@@ -1,4 +1,4 @@
-package com.lgvt.user_service;
+package com.lgvt.user_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +21,11 @@ public class AuthConfig {
         // httpSecurity.csrf().disable();
         httpSecurity.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/api/**").permitAll()
-                .requestMatchers("/rest/public").permitAll()
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/rest/admin").hasRole("ADMIN")
-                .requestMatchers("/rest/user").hasRole("USER")).httpBasic(Customizer.withDefaults());
+        // .requestMatchers("/rest/public").permitAll()
+        // .requestMatchers("/auth/**").permitAll()
+        // .requestMatchers("/rest/admin").hasRole("ADMIN")
+        // .requestMatchers("/rest/user").hasRole("USER")).httpBasic(Customizer.withDefaults()
+        );
 
         return httpSecurity.build();
     }
