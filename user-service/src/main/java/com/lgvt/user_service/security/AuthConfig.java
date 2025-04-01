@@ -26,26 +26,26 @@ public class AuthConfig {
         // .requestMatchers("/rest/admin").hasRole("ADMIN")
         // .requestMatchers("/rest/user").hasRole("USER")).httpBasic(Customizer.withDefaults()
         );
-
+        httpSecurity.csrf().disable();
         return httpSecurity.build();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        // Create an admin user
-        var admin = User.withUsername("admin")
-                .password(passwordEncoder.encode("admin"))
-                .roles("ADMIN", "USER")
-                .build();
+    // @Bean
+    // public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    //     // Create an admin user
+    //     var admin = User.withUsername("admin")
+    //             .password(passwordEncoder.encode("admin"))
+    //             .roles("ADMIN", "USER")
+    //             .build();
 
-        // Create a user
-        var user = User.withUsername("user")
-                .password(passwordEncoder.encode("user"))
-                .roles("USER")
-                .build();
+    //     // Create a user
+    //     var user = User.withUsername("user")
+    //             .password(passwordEncoder.encode("user"))
+    //             .roles("USER")
+    //             .build();
 
-        return new InMemoryUserDetailsManager(admin, user);
-    }
+    //     return new InMemoryUserDetailsManager(admin, user);
+    // }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

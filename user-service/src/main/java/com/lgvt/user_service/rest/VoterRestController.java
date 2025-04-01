@@ -23,4 +23,9 @@ public class VoterRestController {
     public Voter save(@RequestBody Voter voter) {
         return voterService.saveVoter(voter);
     }
+
+    @PostMapping("/voter/login")
+    public Voter login(@RequestBody Voter voter) {
+        return null;
+    }
 }
