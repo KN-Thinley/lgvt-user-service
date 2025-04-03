@@ -10,4 +10,12 @@ public interface VoterDAO {
     void sendRegistrationConfirmationEmail(Voter voter);
 
     Voter changeVoterStatus(int id);
+
+    Voter getVoterByEmail(String email);
+
+    boolean checkIfPasswordMatches(String password, String oldPassword);
+
+    void logoutVoter(Voter voter);
+
+    void passwordReset(String password, Voter voter);
 }

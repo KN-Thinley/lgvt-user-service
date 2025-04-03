@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.lgvt.user_service.entity.SecureToken;
@@ -64,6 +65,8 @@ public class VoterDAOImpl implements VoterDAO {
         // Save the secure token
         secureTokenService.saveSecureToken(secureToken);
 
+        System.out.println("Secure token: " + secureToken.getToken());
+
         // Prepare the email context
         AccountEmailContext emailContext = new AccountEmailContext();
         emailContext.init(voter);
@@ -89,5 +92,43 @@ public class VoterDAOImpl implements VoterDAO {
             return entityManager.merge(existingVoter);
         }
         return null;
+    }
+
+    @Override
+    public Voter getVoterByEmail(String email) {
+        try {
+            TypedQuery<Voter> query = entityManager.createQuery(
+                    "SELECT v FROM Voter v WHERE v.email = :email", Voter.class);
+            query.setParameter("email", email);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null; // Return null if no voter is found with the given emails
+        }
+    }
+
+    @Override
+    public boolean checkIfPasswordMatches(String password, String oldPassword) {
+        boolean isPasswordMatch = passwordEncoder.matches(password, oldPassword);
+        return isPasswordMatch;
+    }
+
+    @Override
+    @Transactional
+    public void logoutVoter(Voter voter) {
+        voter.setLogged_in(false);
+        entityManager.merge(voter);
+    }
+
+    @Override
+    @Transactional
+    public void passwordReset(String password, Voter voter) {
+        // Encrypt the new password
+        String encryptedPassword = passwordEncoder.encode(password);
+
+        // // Update the voter's password
+        voter.setPassword(encryptedPassword);
+
+        // Save the updated voter entity
+        entityManager.merge(voter);
     }
 }
