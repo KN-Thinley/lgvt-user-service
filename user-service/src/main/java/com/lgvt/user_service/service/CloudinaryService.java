@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 public class CloudinaryService {
     @Autowired
-    private final Cloudinary cloudinary;
+    private Cloudinary cloudinary;
 
     @Transactional
     public CidDocument uploadFile(final MultipartFile file, final String fileName) {

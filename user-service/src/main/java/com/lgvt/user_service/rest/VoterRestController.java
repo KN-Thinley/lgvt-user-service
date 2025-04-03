@@ -26,14 +26,9 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/register")
-    public ResponseEntity<?> save(@RequestPart("voter") String voterJson, @RequestPart MultipartFile file) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Voter voter = objectMapper.readValue(voterJson, Voter.class);
+    public ResponseEntity<?> save(@RequestPart Voter voter, @RequestPart MultipartFile file) {
+        try {  
             Voter voter_Res = voterService.saveVoter(voter, file);
-
-            System.out.println("Voter: " + voterJson);
-            System.out.println("file: " + file.getOriginalFilename());
             return new ResponseEntity<>(voter_Res, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

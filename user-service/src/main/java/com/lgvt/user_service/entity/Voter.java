@@ -55,7 +55,6 @@ public class Voter {
     private String village;
 
     @Column(name = "dob", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dob;
 
     @Column(name = "gender", nullable = false)

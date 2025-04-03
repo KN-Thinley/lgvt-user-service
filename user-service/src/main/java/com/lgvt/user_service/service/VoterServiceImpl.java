@@ -15,21 +15,20 @@ import lombok.Data;
 @Service
 @Data
 public class VoterServiceImpl implements VoterService {
+    @Autowired
     private VoterDAO voterDAO;
+    @Autowired
     private CloudinaryService cloudinaryService;
 
     @Override
     @Transactional
     public Voter saveVoter(Voter voter, MultipartFile imageFile) {
-        try {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                final CidDocument cidDocument = uploadImage(voter.getId(), imageFile);
-                voter.setCid_document(cidDocument);
-            }
-            return voterDAO.saveVoter(voter);
-        } catch (Exception e) {
-            throw new RuntimeException("Error saving voter: " + e.getMessage(), e);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            final CidDocument cidDocument = uploadImage(voter.getId(), imageFile);
+            voter.setCid_document(cidDocument);
         }
+
+        return voterDAO.saveVoter(voter);
     }
 
     public CidDocument uploadImage(final Integer id, final MultipartFile imageFile) {

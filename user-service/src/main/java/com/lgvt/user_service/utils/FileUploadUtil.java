@@ -13,10 +13,10 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class FileUploadUtil {
-    public static final long MAX_FILE_SIZE = 1024 * 1024 * 2; // 5MB
-    public static final String IMAGE_PATTERN = "^.*\\.(jpg|jpeg|png)$";
+    public static final long MAX_FILE_SIZE = 1024 * 1024 * 5; // 5MB
+    public static final String IMAGE_PATTERN = ".*\\.(jpg|jpeg|png)$";
     public static final String DATE_FORMAT = "yyyyMMddHHmmss";
-    public static final String FILE_NAME_PATTERN = "%S_%S_%S";
+    public static final String FILE_NAME_PATTERN = "%S_%S";
 
     public static boolean isAllowedExtension(final String fileName, final String pattern) {
         final Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(fileName);
@@ -33,7 +33,7 @@ public class FileUploadUtil {
         final String extension = FilenameUtils.getExtension(fileName);
 
         if (!isAllowedExtension(fileName, pattern)) {
-            throw new IllegalArgumentException("File type not allowed. Allowed types are: " + pattern);
+            throw new IllegalArgumentException("File type" + extension + "not allowed. Allowed types are: " + pattern);
         }
     }
 
