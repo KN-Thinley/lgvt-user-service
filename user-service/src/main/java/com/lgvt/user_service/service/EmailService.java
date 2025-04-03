@@ -1,0 +1,9 @@
+package com.lgvt.user_service.service;
+
+import com.lgvt.user_service.utils.AbstractEmailContext;
+
+import jakarta.mail.MessagingException;
+
+public interface EmailService {
+    void sendMail(final AbstractEmailContext emai) throws MessagingException;
+}

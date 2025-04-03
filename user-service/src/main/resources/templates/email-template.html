@@ -1,0 +1,18 @@
+<!-- filepath: src/main/resources/templates/email-template.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Email Template</title>
+</head>
+
+<body>
+    <h1>Welcome, <span th:text="${name}">[Name]</span>!</h1>
+    <p>
+        Thank you for registering. Please click the link below to verify your
+        email:
+    </p>
+    <a th:href="${verificationUrl}">Verify Email</a>
+</body>
+
+</html>

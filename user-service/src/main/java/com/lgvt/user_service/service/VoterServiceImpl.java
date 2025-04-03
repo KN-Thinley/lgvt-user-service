@@ -7,9 +7,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.lgvt.user_service.dao.CidDocument;
 import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.Voter;
+import com.lgvt.user_service.exception.UserAlreadyExistException;
 import com.lgvt.user_service.utils.FileUploadUtil;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.Data;
 
 @Service
@@ -22,13 +24,19 @@ public class VoterServiceImpl implements VoterService {
 
     @Override
     @Transactional
-    public Voter saveVoter(Voter voter, MultipartFile imageFile) {
+    public Voter saveVoter(@Valid Voter voter, MultipartFile imageFile) {
         if (imageFile != null && !imageFile.isEmpty()) {
             final CidDocument cidDocument = uploadImage(voter.getId(), imageFile);
             voter.setCid_document(cidDocument);
         }
 
-        return voterDAO.saveVoter(voter);
+        if (voterDAO.checkIfUserExists(voter.getEmail())) {
+            throw new UserAlreadyExistException("This Voter already exists");
+        } else {
+            Voter voter_res = voterDAO.saveVoter(voter);
+            voterDAO.sendRegistrationConfirmationEmail(voter_res);
+            return voter_res;
+        }
     }
 
     public CidDocument uploadImage(final Integer id, final MultipartFile imageFile) {
