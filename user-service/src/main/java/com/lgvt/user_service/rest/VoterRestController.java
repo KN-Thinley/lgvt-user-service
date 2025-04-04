@@ -36,13 +36,15 @@ public class VoterRestController {
 
     @PostMapping("/voter/register")
     public ResponseEntity<?> save(@Valid @RequestPart Voter voter, @RequestPart MultipartFile file) {
-        // /register
-        // Return proper response
-        // Proper Error handling
-        Voter voter_Res = voterService.saveVoter(voter, file);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Voter with CID " + voter_Res.getCid() + " has been successfully created.");
+        // Save the voter
+        String token = voterService.saveVoter(voter, file);
 
+        // Response Body Preparation
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Voter with CID " + voter.getCid() + " has been successfully created.");
+        response.put("token", token);
+
+        // Send the OTP to the email
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

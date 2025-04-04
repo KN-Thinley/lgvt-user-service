@@ -29,7 +29,7 @@ public class VoterServiceImpl implements VoterService {
 
     @Override
     @Transactional
-    public Voter saveVoter(@Valid Voter voter, MultipartFile imageFile) {
+    public String saveVoter(@Valid Voter voter, MultipartFile imageFile) {
         if (imageFile != null && !imageFile.isEmpty()) {
             final CidDocument cidDocument = uploadImage(voter.getId(), imageFile);
             voter.setCid_document(cidDocument);
@@ -39,8 +39,9 @@ public class VoterServiceImpl implements VoterService {
             throw new UserAlreadyExistException("This Voter already exists");
         } else {
             Voter voter_res = voterDAO.saveVoter(voter);
-            voterDAO.sendRegistrationConfirmationEmail(voter_res);
-            return voter_res;
+            // Send Email
+            String token = voterDAO.sendRegistrationConfirmationEmail(voter_res);
+            return token;
         }
     }
 

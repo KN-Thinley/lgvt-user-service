@@ -7,7 +7,7 @@ public interface VoterDAO {
 
     boolean checkIfUserExists(String email);
 
-    void sendRegistrationConfirmationEmail(Voter voter);
+    String sendRegistrationConfirmationEmail(Voter voter);
 
     Voter changeVoterStatus(int id);
 

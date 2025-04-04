@@ -58,7 +58,7 @@ public class VoterDAOImpl implements VoterDAO {
     }
 
     @Override
-    public void sendRegistrationConfirmationEmail(Voter voter) {
+    public String sendRegistrationConfirmationEmail(Voter voter) {
         // Create a secure token
         SecureToken secureToken = secureTokenService.createToken(voter);
 
@@ -77,8 +77,14 @@ public class VoterDAOImpl implements VoterDAO {
         // Send the email
         try {
             emailService.sendMail(emailContext);
+            return secureToken.getToken();
         } catch (Exception e) {
+            // Log the error for debugging purposes
+            System.err.println("Failed to send registration confirmation email: " + e.getMessage());
             e.printStackTrace();
+
+            // Throw a custom exception to indicate email sending failure
+            throw new RuntimeException("Failed to send registration confirmation email. Please try again later.");
         }
     }
 

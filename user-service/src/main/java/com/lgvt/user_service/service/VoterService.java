@@ -7,7 +7,7 @@ import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.entity.Voter;
 
 public interface VoterService {
-    Voter saveVoter(Voter voter, MultipartFile imageFile);
+    String saveVoter(Voter voter, MultipartFile imageFile);
 
     LoginResponse loginVoter(Voter voter);
 
