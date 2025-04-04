@@ -12,7 +12,7 @@ import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.exception.UserAlreadyExistException;
 import com.lgvt.user_service.utils.FileUploadUtil;
-import com.lgvt.user_service.utils.TokenGeneration;
+import com.lgvt.user_service.utils.SessionTokenGeneration;
 
 import ch.qos.logback.core.subst.Token;
 import jakarta.transaction.Transactional;
@@ -58,12 +58,6 @@ public class VoterServiceImpl implements VoterService {
         // Check if the user exists
         Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
 
-        System.out.println("Voter: " + existingVoter.getEmail());
-        System.out.println("isPasswordMatches:"
-                + voterDAO.checkIfPasswordMatches(voter.getPassword(), existingVoter.getPassword()));
-        System.out.println(existingVoter.isVerified());
-        System.out.println(existingVoter.isLogged_in());
-
         if (existingVoter != null) {
             // Check if the password is correct
             if (voterDAO.checkIfPasswordMatches(voter.getPassword(), existingVoter.getPassword())) {
@@ -71,7 +65,7 @@ public class VoterServiceImpl implements VoterService {
                 if (existingVoter.isVerified()) {
                     // Check if the user is logged in
                     if (existingVoter.isLogged_in()) {
-                        TokenGeneration tokenGeneration = new TokenGeneration();
+                        SessionTokenGeneration tokenGeneration = new SessionTokenGeneration();
                         String token = tokenGeneration.generateToken(existingVoter.getEmail());
                         return new LoginResponse(
                                 "Login successful",
@@ -80,11 +74,11 @@ public class VoterServiceImpl implements VoterService {
                                 "proceed");
                     } else {
                         // Redirect to MFA page
-                        voterDAO.sendRegistrationConfirmationEmail(existingVoter);
+                        String token = voterDAO.sendLoginMFAEmail(existingVoter);
                         // Generate and send a email
                         return new LoginResponse(
                                 "Multifactor Authentication needed",
-                                null,
+                                token,
                                 false,
                                 "redirect_to_mfa");
                     }

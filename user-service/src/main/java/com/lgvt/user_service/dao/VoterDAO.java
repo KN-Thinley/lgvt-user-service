@@ -9,6 +9,8 @@ public interface VoterDAO {
 
     String sendRegistrationConfirmationEmail(Voter voter);
 
+    String sendLoginMFAEmail(Voter voter);
+
     Voter changeVoterStatus(int id);
 
     Voter getVoterByEmail(String email);

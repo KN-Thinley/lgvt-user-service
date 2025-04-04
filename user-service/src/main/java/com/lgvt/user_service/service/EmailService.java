@@ -6,4 +6,6 @@ import jakarta.mail.MessagingException;
 
 public interface EmailService {
     void sendMail(final AbstractEmailContext emai) throws MessagingException;
+
+    void sendMFAMail(final AbstractEmailContext email) throws MessagingException;
 }

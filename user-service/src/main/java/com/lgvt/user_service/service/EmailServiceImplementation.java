@@ -44,5 +44,35 @@ public class EmailServiceImplementation implements EmailService {
     System.out.println("Email sent successfully to: " + email.getTo());
   }
 
-}
+  @Override
+  public void sendMFAMail(final AbstractEmailContext email) throws MessagingException {
+    MimeMessage message = emailSender.createMimeMessage();
+    MimeMessageHelper messageHelper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+        StandardCharsets.UTF_8.name());
 
+    // Create the email content manually
+    String emailContent = "<html><body>"
+        + "<h1>Multi-Factor Authentication (MFA)</h1>"
+        + "<p>Dear " + email.getContext().get("name") + ",</p>"
+        + "<p>We received a request to log in to your account. Please use the verification code below to complete the login process:</p>"
+        + "<p style='font-size: 18px; font-weight: bold;'>Your verification code: <b>" + email.getOtp() + "</b></p>"
+        + "<p>If you did not request this, please ignore this email or contact support immediately.</p>"
+        + "<p>Thank you,</p>"
+        + "<p>The LGVT User Service Team</p>"
+        + "</body></html>";
+
+    // Debug logs
+    System.out.println("Sending email to: " + email.getTo());
+    System.out.println("Email subject: " + email.getSubject());
+    System.out.println("Email content: " + emailContent);
+
+    messageHelper.setTo(email.getTo());
+    messageHelper.setFrom(email.getFrom());
+    messageHelper.setSubject(email.getSubject());
+    messageHelper.setText(emailContent, true);
+
+    emailSender.send(message);
+    System.out.println("Email sent successfully to: " + email.getTo());
+  }
+
+}

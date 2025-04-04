@@ -89,6 +89,37 @@ public class VoterDAOImpl implements VoterDAO {
     }
 
     @Override
+    public String sendLoginMFAEmail(Voter voter) {
+        // Create a secure token
+        SecureToken secureToken = secureTokenService.createToken(voter);
+
+        // Save the secure token
+        secureTokenService.saveSecureToken(secureToken);
+
+        System.out.println("Secure token: " + secureToken.getToken());
+
+        // Prepare the email context
+        AccountEmailContext emailContext = new AccountEmailContext();
+        emailContext.init(voter);
+        emailContext.setToken(secureToken.getToken());
+        emailContext.setOtp(secureToken.getOtp());
+        emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());
+
+        // Send the email
+        try {
+            emailService.sendMFAMail(emailContext);
+            return secureToken.getToken();
+        } catch (Exception e) {
+            // Log the error for debugging purposes
+            System.err.println("Failed to send registration confirmation email: " + e.getMessage());
+            e.printStackTrace();
+
+            // Throw a custom exception to indicate email sending failure
+            throw new RuntimeException("Failed to send registration confirmation email. Please try again later.");
+        }
+    }
+
+    @Override
     @Transactional
     public Voter changeVoterStatus(int id) {
         Voter existingVoter = entityManager.find(Voter.class, id);

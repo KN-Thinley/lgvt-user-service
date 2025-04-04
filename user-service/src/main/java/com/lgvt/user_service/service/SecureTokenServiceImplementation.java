@@ -14,6 +14,8 @@ import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class SecureTokenServiceImplementation implements SecureTokenService {
     private static BytesKeyGenerator DEFAULT_TOKEN_GENERATOR = KeyGenerators.secureRandom(12);
@@ -71,6 +73,8 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
 
         // Verify OTP
         if (secureToken.getOtp() == otp) {
+            System.out.println(token);
+            removeToken(token);
             return true;
         } else {
             throw new RuntimeException("Invalid OTP. Please try again.");
