@@ -67,14 +67,13 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
 
         // Check if the token is expired
         if (secureToken.getExpireAt().isBefore(LocalDateTime.now())) {
-            secureTokenDAO.removeByToken(token);
             throw new RuntimeException("Token has expired. Please request a new one.");
         }
 
         // Verify OTP
         if (secureToken.getOtp() == otp) {
             System.out.println(token);
-            removeToken(token);
+            secureTokenDAO.removeByToken(token);
             return true;
         } else {
             throw new RuntimeException("Invalid OTP. Please try again.");
