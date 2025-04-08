@@ -95,4 +95,14 @@ public abstract class AbstractEmailContext {
     public Map<String, Object> getContext() {
         return context;
     }
+
+    public void setToken(String token) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setToken'");
+    }
+
+    public void buildVerificationUrl(String baseUrl, String token) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'buildVerificationUrl'");
+    }
 }

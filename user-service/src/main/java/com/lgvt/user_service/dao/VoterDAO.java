@@ -1,5 +1,6 @@
 package com.lgvt.user_service.dao;
 
+import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 
 public interface VoterDAO {
@@ -24,4 +25,6 @@ public interface VoterDAO {
     void logoutVoter(Voter voter);
 
     void passwordReset(String password, Voter voter);
+
+    String resentOTP(SecureToken secureToken,String type);
 }

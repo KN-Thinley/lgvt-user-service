@@ -187,10 +187,22 @@ public class VoterServiceImpl implements VoterService {
         return ResponseEntity.ok("Password has been successfully reset.");
     }
 
-    public ResponseEntity<String> resentOTP(String token){
-        // Fetch using the token 
-        // Fetch the OTP 
-        // Send the OTP to the email
-        return null;
+    public ResponseEntity<String> resentOTP(String token,String type) {
+        // Fetch the SecureToken using the token
+        SecureToken secureToken = secureTokenService.findByToken(token);
+
+        if (secureToken == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid token. Please request a new one.");
+        }
+
+        try {
+            String newToken = voterDAO.resentOTP(secureToken, type);
+
+            // Return the new token in the response
+            return ResponseEntity.ok("A new OTP has been sent to your email. Token: " + newToken);
+        } catch (Exception e) {
+            // Handle any exceptions during the process
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to resend OTP.");
+        }
     }
 }

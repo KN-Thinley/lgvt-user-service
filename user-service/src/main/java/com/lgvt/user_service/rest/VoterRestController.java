@@ -130,12 +130,7 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/resent-otp")
-    public ResponseEntity<String> resentOTP(@RequestParam("token") String token) {
-        // Receive the email
-        // Make sure the email is valid
-        // Send the otp to the email
-        // Return the response with token
-        // return voterService.resentOTP(voter);
-        return voterService.resentOTP(token);
+    public ResponseEntity<String> resentOTP(@RequestParam("token") String token, @RequestParam("type") String type) {
+        return voterService.resentOTP(token, type);
     }
 }

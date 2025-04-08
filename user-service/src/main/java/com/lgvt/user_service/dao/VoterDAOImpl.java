@@ -11,6 +11,7 @@ import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.service.EmailService;
 import com.lgvt.user_service.service.SecureTokenService;
+import com.lgvt.user_service.utils.AbstractEmailContext;
 import com.lgvt.user_service.utils.AccountEmailContext;
 import com.lgvt.user_service.utils.ForgotPasswordContext;
 import com.lgvt.user_service.utils.MFAEmailContext;
@@ -141,6 +142,43 @@ public class VoterDAOImpl implements VoterDAO {
         // Send the email
         try {
             emailService.sendForgotPasswordMail(emailContext);
+            return secureToken.getToken();
+        } catch (Exception e) {
+            // Log the error for debugging purposes
+            System.err.println("Failed to send registration confirmation email: " + e.getMessage());
+            e.printStackTrace();
+
+            // Throw a custom exception to indicate email sending failure
+            throw new RuntimeException("Failed to send registration confirmation email. Please try again later.");
+        }
+    }
+
+    @Override
+    public String resentOTP(SecureToken secureToken, String type) {
+        // Prepare the email context
+        AbstractEmailContext emailContext;
+
+        if (type.equals("Registration")) {
+            emailContext = new AccountEmailContext();
+        } else if (type.equals("MFA")) {
+            emailContext = new MFAEmailContext();
+        } else {
+            emailContext = new ForgotPasswordContext();
+        }
+
+        emailContext.init(secureToken.getVoter());
+        emailContext.setToken(secureToken.getToken());
+        emailContext.setOtp(secureToken.getOtp());
+        emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());
+
+        try {
+            if (type.equals("Registration")) {
+                emailService.sendMail(emailContext);
+            } else if (type.equals("MFA")) {
+                emailService.sendMFAMail(emailContext);
+            } else {
+                emailService.sendForgotPasswordMail(emailContext);
+            }
             return secureToken.getToken();
         } catch (Exception e) {
             // Log the error for debugging purposes
