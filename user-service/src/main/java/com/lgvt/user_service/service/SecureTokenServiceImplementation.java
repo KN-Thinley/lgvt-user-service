@@ -28,6 +28,7 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     @Autowired
     private VoterDAO voterDAO;
 
+    @Transactional
     @Override
     public SecureToken createToken(Voter voter) {
         String tokenValue = new String(Base64.getEncoder().encode(DEFAULT_TOKEN_GENERATOR.generateKey()));
@@ -42,21 +43,25 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
         return secureToken;
     }
 
+    @Transactional
     @Override
     public void saveSecureToken(SecureToken secureToken) {
         secureTokenDAO.save(secureToken);
     }
 
+    @Transactional
     @Override
     public SecureToken findByToken(String token) {
         return secureTokenDAO.findByToken(token);
     }
 
+    @Transactional
     @Override
     public void removeToken(String token) {
-        secureTokenDAO.removeByToken(token);
+        secureTokenDAO.deleteByToken(token);
     }
 
+    @Transactional
     @Override
     public boolean verifyOtp(int otp, String token) {
         SecureToken secureToken = secureTokenDAO.findByToken(token);
@@ -67,14 +72,14 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
 
         // Check if the token is expired
         if (secureToken.getExpireAt().isBefore(LocalDateTime.now())) {
-            secureTokenDAO.removeByToken(token);
             throw new RuntimeException("Token has expired. Please request a new one.");
         }
 
         // Verify OTP
         if (secureToken.getOtp() == otp) {
-            System.out.println(token);
+            int voter_id = secureToken.getVoter().getId();
             removeToken(token);
+            voterDAO.changeVoterStatus(voter_id);
             return true;
         } else {
             throw new RuntimeException("Invalid OTP. Please try again.");
