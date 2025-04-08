@@ -11,7 +11,11 @@ public interface VoterDAO {
 
     String sendLoginMFAEmail(Voter voter);
 
+    String sendForgotPasswordEmail(Voter voter);
+
     Voter changeVoterStatus(int id);
+
+    Voter changeVoterLoginStatus(int id);
 
     Voter getVoterByEmail(String email);
 

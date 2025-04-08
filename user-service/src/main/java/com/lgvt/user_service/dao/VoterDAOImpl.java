@@ -12,6 +12,8 @@ import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.service.EmailService;
 import com.lgvt.user_service.service.SecureTokenService;
 import com.lgvt.user_service.utils.AccountEmailContext;
+import com.lgvt.user_service.utils.ForgotPasswordContext;
+import com.lgvt.user_service.utils.MFAEmailContext;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -99,7 +101,7 @@ public class VoterDAOImpl implements VoterDAO {
         System.out.println("Secure token: " + secureToken.getToken());
 
         // Prepare the email context
-        AccountEmailContext emailContext = new AccountEmailContext();
+        MFAEmailContext emailContext = new MFAEmailContext();
         emailContext.init(voter);
         emailContext.setToken(secureToken.getToken());
         emailContext.setOtp(secureToken.getOtp());
@@ -120,11 +122,53 @@ public class VoterDAOImpl implements VoterDAO {
     }
 
     @Override
+    public String sendForgotPasswordEmail(Voter voter) {
+        // Create a secure token
+        SecureToken secureToken = secureTokenService.createToken(voter);
+
+        // Save the secure token
+        secureTokenService.saveSecureToken(secureToken);
+
+        System.out.println("Secure token: " + secureToken.getToken());
+
+        // Prepare the email context
+        ForgotPasswordContext emailContext = new ForgotPasswordContext();
+        emailContext.init(voter);
+        emailContext.setToken(secureToken.getToken());
+        emailContext.setOtp(secureToken.getOtp());
+        emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());
+
+        // Send the email
+        try {
+            emailService.sendForgotPasswordMail(emailContext);
+            return secureToken.getToken();
+        } catch (Exception e) {
+            // Log the error for debugging purposes
+            System.err.println("Failed to send registration confirmation email: " + e.getMessage());
+            e.printStackTrace();
+
+            // Throw a custom exception to indicate email sending failure
+            throw new RuntimeException("Failed to send registration confirmation email. Please try again later.");
+        }
+    }
+
+    @Override
     @Transactional
     public Voter changeVoterStatus(int id) {
         Voter existingVoter = entityManager.find(Voter.class, id);
         if (existingVoter != null) {
             existingVoter.setVerified(true);
+            existingVoter.setLogged_in(true);
+            return entityManager.merge(existingVoter);
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Voter changeVoterLoginStatus(int id) {
+        Voter existingVoter = entityManager.find(Voter.class, id);
+        if (existingVoter != null) {
             existingVoter.setLogged_in(true);
             return entityManager.merge(existingVoter);
         }

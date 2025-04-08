@@ -15,4 +15,6 @@ public interface SecureTokenService {
     boolean verifyOtp(int otp, String token);
 
     void changeVoterStatus(String token);
+
+    void changeVoterLoginStatus(String token);
 }

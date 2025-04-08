@@ -1,14 +1,19 @@
 package com.lgvt.user_service.service;
 
 import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.dao.CidDocument;
 import com.lgvt.user_service.dao.VoterDAO;
+import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.exception.UserAlreadyExistException;
 import com.lgvt.user_service.utils.FileUploadUtil;
@@ -26,6 +31,8 @@ public class VoterServiceImpl implements VoterService {
     private VoterDAO voterDAO;
     @Autowired
     private CloudinaryService cloudinaryService;
+    @Autowired
+    private SecureTokenService secureTokenService;
 
     @Override
     @Transactional
@@ -52,8 +59,6 @@ public class VoterServiceImpl implements VoterService {
         return response;
     }
 
-    // If user is logged in then return the session
-    // If user is not logged in then redirect to the MFA page
     public LoginResponse loginVoter(Voter voter) {
         // Check if the user exists
         Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
@@ -130,33 +135,62 @@ public class VoterServiceImpl implements VoterService {
         }
     }
 
-    public ResponseEntity<String> forgotPassword(Voter voter) {
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(Voter voter) {
         // Check if the user exists
         Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
         if (existingVoter == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with the provided email does not exist.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ForgotPasswordResponse("User with the provided email does not exist.", null));
         }
 
         // Use voterDAO to send the OTP and email
         try {
-            voterDAO.sendRegistrationConfirmationEmail(existingVoter);
-            // Return a success response
-            return ResponseEntity.ok("OTP has been sent to your email. Use the token for further verification.");
+            String token = voterDAO.sendForgotPasswordEmail(existingVoter);
+            // Return a success response with the token
+            return ResponseEntity.ok(new ForgotPasswordResponse(
+                    "OTP has been sent to your email. Use the token for further verification.", token));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send OTP to email.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ForgotPasswordResponse("Failed to send OTP to email.", null));
         }
     }
 
-    public ResponseEntity<String> resetPassword(Voter voter) {
-        // Check if the user exists
-        Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
-        if (existingVoter == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with the provided email does not exist.");
+    public ResponseEntity<String> resetPassword(String password, String token) {
+        // Retrieve the SecureToken using the token
+        SecureToken secureToken = secureTokenService.findByToken(token);
+
+        if (secureToken == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid token. Please request a new one.");
         }
 
-        voterDAO.passwordReset(voter.getPassword(), existingVoter);
+        // Check if the token is expired
+        if (secureToken.getExpireAt().isBefore(LocalDateTime.now())) {
+            secureTokenService.removeToken(token);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token has expired. Please request a new one.");
+        }
+
+        // Retrieve the associated Voter using the token
+        Voter existingVoter = secureToken.getVoter();
+        System.out.println("Existing Voter: " + existingVoter);
+
+        if (existingVoter == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No voter associated with this token.");
+        }
+
+        // Pass the voter's old password to the passwordReset method
+        voterDAO.passwordReset(password, existingVoter);
+
+        // Remove the token after successful password reset
+        secureTokenService.removeToken(token);
 
         // Return a success response
         return ResponseEntity.ok("Password has been successfully reset.");
+    }
+
+    public ResponseEntity<String> resentOTP(String token){
+        // Fetch using the token 
+        // Fetch the OTP 
+        // Send the OTP to the email
+        return null;
     }
 }

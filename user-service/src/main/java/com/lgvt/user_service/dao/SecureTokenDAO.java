@@ -10,9 +10,5 @@ import jakarta.transaction.Transactional;
 
 public interface SecureTokenDAO extends JpaRepository<SecureToken, Long> {
     SecureToken findByToken(final String token);
-
-    @Transactional
-    // @Modifying
-    // @Query("DELETE FROM SecureToken st WHERE st.token = :token")
-    Long removeByToken(final String token);
+    Long deleteByToken(final String token);
 }
