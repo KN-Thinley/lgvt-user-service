@@ -52,6 +52,12 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     @Transactional
     @Override
     public SecureToken findByToken(String token) {
+        Exception e = new Exception(); // Capture stack trace
+        System.out.println("Finding token: " + token);
+        e.printStackTrace();
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Token is null or empty");
+        }
         return secureTokenDAO.findByToken(token);
     }
 
@@ -65,6 +71,8 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     @Override
     public boolean verifyOtp(int otp, String token) {
         SecureToken secureToken = secureTokenDAO.findByToken(token);
+
+        boolean isValid = false;
 
         if (secureToken == null) {
             throw new RuntimeException("Invalid token. Please request a new one.");
@@ -80,16 +88,21 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
             int voter_id = secureToken.getVoter().getId();
             removeToken(token);
             voterDAO.changeVoterStatus(voter_id);
-            return true;
+            isValid = true;
         } else {
             throw new RuntimeException("Invalid OTP. Please try again.");
         }
+
+        // Remove the token after successful verification
+        return isValid;
     }
 
+    @Transactional
     @Override
     public void changeVoterStatus(String token) {
         SecureToken secureToken = secureTokenDAO.findByToken(token);
         int voter_id = secureToken.getVoter().getId();
         Voter voter = voterDAO.changeVoterStatus(voter_id);
+
     }
 }
