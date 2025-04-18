@@ -70,6 +70,7 @@ public class VoterRestController {
 
     @PostMapping("/voter/login")
     public ResponseEntity<?> login(@RequestBody Voter voter) {
+        System.out.println("Inside the login api");
         return new ResponseEntity<>(voterService.loginVoter(voter), HttpStatus.OK);
     }
 

@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +36,10 @@ public class VoterServiceImpl implements VoterService {
     private CloudinaryService cloudinaryService;
     @Autowired
     private SecureTokenService secureTokenService;
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtService jwtService;
 
     @Override
     @Transactional
@@ -59,58 +66,71 @@ public class VoterServiceImpl implements VoterService {
         return response;
     }
 
-    public LoginResponse loginVoter(Voter voter) {
-        // Check if the user exists
-        Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
+    // LoginResponse
+    public String loginVoter(Voter voter) {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(), voter.getPassword()));
 
-        if (existingVoter != null) {
-            // Check if the password is correct
-            if (voterDAO.checkIfPasswordMatches(voter.getPassword(), existingVoter.getPassword())) {
-                // Check if the user is verified
-                if (existingVoter.isVerified()) {
-                    // Check if the user is logged in
-                    if (existingVoter.isLogged_in()) {
-                        SessionTokenGeneration tokenGeneration = new SessionTokenGeneration();
-                        String token = tokenGeneration.generateToken(existingVoter.getEmail());
-                        return new LoginResponse(
-                                "Login successful",
-                                token,
-                                true,
-                                "proceed");
-                    } else {
-                        // Redirect to MFA page
-                        String token = voterDAO.sendLoginMFAEmail(existingVoter);
-                        // Generate and send a email
-                        return new LoginResponse(
-                                "Multifactor Authentication needed",
-                                token,
-                                false,
-                                "redirect_to_mfa");
-                    }
-                } else {
-                    // User is not verified
-                    return new LoginResponse(
-                            "User is not verified",
-                            null,
-                            false,
-                            "verify_user");
-                }
-            } else {
-                // Password is incorrect
-                return new LoginResponse(
-                        "Incorrect password",
-                        null,
-                        false,
-                        "retry_login");
-            }
-        } else {
-            // User does not exist
-            return new LoginResponse(
-                    "User does not exist",
-                    null,
-                    false,
-                    "register_user");
+        if (authentication.isAuthenticated()) {
+            String token = jwtService.generateToken(voter);
+            System.out.println("Token: " + token);
+            return token;
         }
+
+        return "failed";
+
+        // Check if the user exists
+        // Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
+
+        // if (existingVoter != null) {
+        // // Check if the password is correct
+        // if (voterDAO.checkIfPasswordMatches(voter.getPassword(),
+        // existingVoter.getPassword())) {
+        // // Check if the user is verified
+        // if (existingVoter.isVerified()) {
+        // // Check if the user is logged in
+        // if (existingVoter.isLogged_in()) {
+        // SessionTokenGeneration tokenGeneration = new SessionTokenGeneration();
+        // String token = tokenGeneration.generateToken(existingVoter.getEmail());
+        // return new LoginResponse(
+        // "Login successful",
+        // token,
+        // true,
+        // "proceed");
+        // } else {
+        // // Redirect to MFA page
+        // String token = voterDAO.sendLoginMFAEmail(existingVoter);
+        // // Generate and send a email
+        // return new LoginResponse(
+        // "Multifactor Authentication needed",
+        // token,
+        // false,
+        // "redirect_to_mfa");
+        // }
+        // } else {
+        // // User is not verified
+        // return new LoginResponse(
+        // "User is not verified",
+        // null,
+        // false,
+        // "verify_user");
+        // }
+        // } else {
+        // // Password is incorrect
+        // return new LoginResponse(
+        // "Incorrect password",
+        // null,
+        // false,
+        // "retry_login");
+        // }
+        // } else {
+        // // User does not exist
+        // return new LoginResponse(
+        // "User does not exist",
+        // null,
+        // false,
+        // "register_user");
+        // }
     }
 
     public ResponseEntity<String> logout(Voter voter) {
@@ -187,7 +207,7 @@ public class VoterServiceImpl implements VoterService {
         return ResponseEntity.ok("Password has been successfully reset.");
     }
 
-    public ResponseEntity<String> resentOTP(String token,String type) {
+    public ResponseEntity<String> resentOTP(String token, String type) {
         // Fetch the SecureToken using the token
         SecureToken secureToken = secureTokenService.findByToken(token);
 

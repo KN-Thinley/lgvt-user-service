@@ -10,7 +10,7 @@ import com.lgvt.user_service.entity.Voter;
 public interface VoterService {
     String saveVoter(Voter voter, MultipartFile imageFile);
 
-    LoginResponse loginVoter(Voter voter);
+    String loginVoter(Voter voter);
 
     ResponseEntity<String> logout(Voter voter);
 
