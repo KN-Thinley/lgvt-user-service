@@ -32,15 +32,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(customizer -> customizer.disable());
-        httpSecurity.authorizeHttpRequests((requests) -> requests.anyRequest().authenticated());
+        httpSecurity.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
+        // httpSecurity.authorizeHttpRequests((requests) -> requests.anyRequest().authenticated());
         // httpSecurity.formLogin(Customizer.withDefaults());
-        httpSecurity.httpBasic(Customizer.withDefaults());
-        httpSecurity.sessionManagement(session -> session
-                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)); // Ways
-                                                                                                                   // to
-                                                                                                                   // handle
-                                                                                                                   // SRF
-                                                                                                                   // attacks
+        // httpSecurity.httpBasic(Customizer.withDefaults());
+        // httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
         return httpSecurity.build();
     }
 
