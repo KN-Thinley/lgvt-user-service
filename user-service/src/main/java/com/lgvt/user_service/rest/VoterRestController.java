@@ -22,6 +22,7 @@ import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.service.SecureTokenService;
 import com.lgvt.user_service.service.VoterService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -69,9 +70,8 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/login")
-    public ResponseEntity<?> login(@RequestBody Voter voter) {
-        System.out.println("Inside the login api");
-        return new ResponseEntity<>(voterService.loginVoter(voter), HttpStatus.OK);
+    public ResponseEntity<?> login(@RequestBody Voter voter, HttpServletResponse response) {
+        return voterService.loginVoter(voter, response);
     }
 
     @PostMapping("/voter/verify-login-otp")
@@ -91,8 +91,8 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/logout")
-    public ResponseEntity<String> logout(@RequestBody Voter voter) {
-        return voterService.logout(voter);
+    public ResponseEntity<String> logout(@RequestBody Voter voter, HttpServletResponse response) {
+        return voterService.logout(voter,response);
     }
 
     @PostMapping("/voter/forgot-password")

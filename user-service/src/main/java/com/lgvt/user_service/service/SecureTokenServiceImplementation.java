@@ -100,7 +100,6 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
         System.out.println("secureToken: " + secureToken);
         int voter_id = secureToken.getVoter().getId();
         Voter voter = voterDAO.changeVoterStatus(voter_id);
-
     }
 
     @Transactional

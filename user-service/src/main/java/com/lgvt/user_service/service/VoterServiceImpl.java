@@ -3,12 +3,15 @@ package com.lgvt.user_service.service;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,10 +22,10 @@ import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.exception.UserAlreadyExistException;
+import com.lgvt.user_service.security.CustomDetailsService;
 import com.lgvt.user_service.utils.FileUploadUtil;
-import com.lgvt.user_service.utils.SessionTokenGeneration;
-
-import ch.qos.logback.core.subst.Token;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.Data;
@@ -40,6 +43,8 @@ public class VoterServiceImpl implements VoterService {
     AuthenticationManager authenticationManager;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private CustomDetailsService customUserDetailsService;
 
     @Override
     @Transactional
@@ -66,18 +71,28 @@ public class VoterServiceImpl implements VoterService {
         return response;
     }
 
-    // LoginResponse
-    public String loginVoter(Voter voter) {
+    public ResponseEntity<Map<String, Object>> loginVoter(Voter voter, HttpServletResponse response) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(), voter.getPassword()));
 
         if (authentication.isAuthenticated()) {
-            String token = jwtService.generateToken(voter);
-            System.out.println("Token: " + token);
-            return token;
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
+            String token = jwtService.generateToken(userDetails);
+
+            // Set JWT as a cookie
+            Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+            jwtCookie.setHttpOnly(true);
+            response.addCookie(jwtCookie);
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("token", token);
+            return ResponseEntity.ok(responseBody);
         }
 
-        return "failed";
+        // Return a failed response with an appropriate status and message
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("message", "Invalid email or password. Please try again.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
 
         // Check if the user exists
         // Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
@@ -133,7 +148,7 @@ public class VoterServiceImpl implements VoterService {
         // }
     }
 
-    public ResponseEntity<String> logout(Voter voter) {
+    public ResponseEntity<String> logout(Voter voter, HttpServletResponse response) {
         // Check if the user exists
         // Check if the user is logged in
         // If the user is logged in then change the status of the login to false
@@ -142,13 +157,18 @@ public class VoterServiceImpl implements VoterService {
 
         if (existingVoter != null) {
             if (existingVoter.isLogged_in()) {
+                // DB Changes
                 voterDAO.logoutVoter(existingVoter);
-                return ResponseEntity.ok("Logout successful");
+
+                // ་Cookie Clearing
+                Cookie jwtCookie = new Cookie("JWT-TOKEN", null);
+                jwtCookie.setMaxAge(0);
+                response.addCookie(jwtCookie);
+                return ResponseEntity.ok().build();
             } else {
                 // User is not logged in
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is already logged out");
             }
-            // Logout the user
         } else {
             // User is not logged in
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");

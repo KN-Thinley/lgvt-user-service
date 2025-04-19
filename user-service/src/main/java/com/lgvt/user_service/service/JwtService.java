@@ -35,9 +35,9 @@ public class JwtService {
         }
     }
 
-    public String generateToken(Voter user) {
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder().claims().add(claims).subject(user.getEmail())
+        return Jwts.builder().claims().add(claims).subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 30)).and().signWith(getKey()).compact();
     }
