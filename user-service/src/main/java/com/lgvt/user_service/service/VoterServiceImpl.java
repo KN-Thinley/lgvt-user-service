@@ -71,81 +71,67 @@ public class VoterServiceImpl implements VoterService {
         return response;
     }
 
-    public ResponseEntity<Map<String, Object>> loginVoter(Voter voter, HttpServletResponse response) {
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(), voter.getPassword()));
+    public ResponseEntity<LoginResponse> loginVoter(Voter voter, HttpServletResponse response) {
+        Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
 
-        if (authentication.isAuthenticated()) {
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
-            String token = jwtService.generateToken(userDetails);
+        if (existingVoter != null) {
+            // Check if the password is correct
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(),
+                            voter.getPassword()));
+            if (authentication.isAuthenticated()) {
+                // Check if the user is verified
+                if (existingVoter.isVerified()) {
+                    // Check if the user has done MFA
+                    if (existingVoter.isLogged_in()) {
 
-            // Set JWT as a cookie
-            Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
-            jwtCookie.setHttpOnly(true);
-            response.addCookie(jwtCookie);
+                        UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
+                        String token = jwtService.generateToken(userDetails);
 
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("token", token);
-            return ResponseEntity.ok(responseBody);
+                        // Set JWT as a cookie
+                        Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+                        jwtCookie.setHttpOnly(true);
+                        response.addCookie(jwtCookie);
+
+                        return ResponseEntity.ok(new LoginResponse(
+                                "Login successful",
+                                token,
+                                true,
+                                "proceed"));
+                    } else {
+                        // Redirect to MFA page
+                        String token = voterDAO.sendLoginMFAEmail(existingVoter);
+                        // Generate and send a email
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
+                                "Multifactor Authentication needed",
+                                token,
+                                false,
+                                "redirect_to_mfa"));
+                    }
+                } else {
+                    // User is not verified
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new LoginResponse(
+                            "User is not verified",
+                            null,
+                            false,
+                            "verify_user"));
+                }
+            } else {
+                // Password is incorrect
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
+                        "Incorrect password",
+                        null,
+                        false,
+                        "retry_login"));
+            }
+        } else {
+            // User does not exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LoginResponse(
+                    "User does not exist",
+                    null,
+                    false,
+                    "register_user"));
         }
-
-        // Return a failed response with an appropriate status and message
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("message", "Invalid email or password. Please try again.");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        // Check if the user exists
-        // Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
-
-        // if (existingVoter != null) {
-        // // Check if the password is correct
-        // if (voterDAO.checkIfPasswordMatches(voter.getPassword(),
-        // existingVoter.getPassword())) {
-        // // Check if the user is verified
-        // if (existingVoter.isVerified()) {
-        // // Check if the user is logged in
-        // if (existingVoter.isLogged_in()) {
-        // SessionTokenGeneration tokenGeneration = new SessionTokenGeneration();
-        // String token = tokenGeneration.generateToken(existingVoter.getEmail());
-        // return new LoginResponse(
-        // "Login successful",
-        // token,
-        // true,
-        // "proceed");
-        // } else {
-        // // Redirect to MFA page
-        // String token = voterDAO.sendLoginMFAEmail(existingVoter);
-        // // Generate and send a email
-        // return new LoginResponse(
-        // "Multifactor Authentication needed",
-        // token,
-        // false,
-        // "redirect_to_mfa");
-        // }
-        // } else {
-        // // User is not verified
-        // return new LoginResponse(
-        // "User is not verified",
-        // null,
-        // false,
-        // "verify_user");
-        // }
-        // } else {
-        // // Password is incorrect
-        // return new LoginResponse(
-        // "Incorrect password",
-        // null,
-        // false,
-        // "retry_login");
-        // }
-        // } else {
-        // // User does not exist
-        // return new LoginResponse(
-        // "User does not exist",
-        // null,
-        // false,
-        // "register_user");
-        // }
     }
 
     public ResponseEntity<String> logout(Voter voter, HttpServletResponse response) {

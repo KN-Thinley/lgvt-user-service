@@ -14,9 +14,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface VoterService {
     String saveVoter(Voter voter, MultipartFile imageFile);
 
-    ResponseEntity<Map<String, Object>> loginVoter(Voter voter, HttpServletResponse response);
+    ResponseEntity<LoginResponse> loginVoter(Voter voter, HttpServletResponse response);
 
-    ResponseEntity<String> logout(Voter voter,HttpServletResponse response);
+    ResponseEntity<String> logout(Voter voter, HttpServletResponse response);
 
     ResponseEntity<ForgotPasswordResponse> forgotPassword(Voter voter);
 
