@@ -74,9 +74,9 @@ public class Voter {
     @Column(name = "is_logged_in", nullable = false)
     private boolean logged_in = false;
 
-    public enum Gender {
-        MALE, FEMALE
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role = Role.VOTER;
 
     // Custom validation method to ensure age is 18 or older
     @AssertTrue(message = "Voter must be at least 18 years old")
