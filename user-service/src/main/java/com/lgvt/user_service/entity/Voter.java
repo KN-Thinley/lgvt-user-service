@@ -78,6 +78,10 @@ public class Voter {
     @Column(name = "role", nullable = false)
     private Role role = Role.VOTER;
 
+    @Column(name = "occupation", nullable = false)
+    @NotBlank(message = "Occupation is required")
+    private String occupation;
+
     // Custom validation method to ensure age is 18 or older
     @AssertTrue(message = "Voter must be at least 18 years old")
     public boolean isAdult() {
