@@ -40,8 +40,10 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/api/auth/voter/register", "/api/auth/voter/login",
                         "/api/auth/voter/verify-login-otp", "/api/auth/verify-otp", "/api/auth/voter/forgot-password",
-                        "/api/auth/voter/verify-forgot-password-otp", "/api/auth/voter/reset-password","/api/auth/voter/resent-otp")
+                        "/api/auth/voter/verify-forgot-password-otp", "/api/auth/voter/reset-password",
+                        "/api/auth/voter/resent-otp")
                 .permitAll()
+                // .requestMatchers("/hello").hasRole("ADMIN")
                 .anyRequest().authenticated());
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session

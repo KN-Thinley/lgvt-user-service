@@ -7,28 +7,29 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.Voter;
 
 public class CustomUserDetails implements UserDetails {
-    private Voter voter;
+    private GeneralUser user;
 
-    public CustomUserDetails(Voter voter) {
-        this.voter = voter;
+    public CustomUserDetails(GeneralUser user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return voter.getPassword();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return voter.getEmail();
+        return user.getEmail();
     }
 
 }

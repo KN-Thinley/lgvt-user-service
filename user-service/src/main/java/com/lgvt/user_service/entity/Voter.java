@@ -14,7 +14,7 @@ import lombok.Data;
 @Entity
 @Table(name = "voter")
 @Data
-public class Voter {
+public class Voter implements GeneralUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
