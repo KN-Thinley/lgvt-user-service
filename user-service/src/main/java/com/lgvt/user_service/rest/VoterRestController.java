@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -137,7 +138,14 @@ public class VoterRestController {
     }
 
     @GetMapping("/voter/info")
-    public boolean getVoterInfo() {
-        return true;
+    public ResponseEntity<Map<String, Object>> getVoterInfo(Authentication authentication) {
+        String email = authentication.getName();
+        return voterService.getVoterInfoByEmail(email);
+    }
+
+    @PostMapping("/voter/update-password")
+    public ResponseEntity<String> updatePassword(@RequestParam String password, Authentication authentication) {
+        String email = authentication.getName();
+        return voterService.updatePassword(password, email);
     }
 }

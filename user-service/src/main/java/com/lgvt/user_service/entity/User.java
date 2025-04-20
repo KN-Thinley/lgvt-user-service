@@ -7,7 +7,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Data
 public class User {
     @Id

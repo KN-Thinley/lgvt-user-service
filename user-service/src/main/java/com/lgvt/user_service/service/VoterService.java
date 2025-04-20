@@ -23,4 +23,8 @@ public interface VoterService {
     ResponseEntity<String> resetPassword(String password, String token);
 
     ResponseEntity<String> resentOTP(String token, String type);
+
+    ResponseEntity<Map<String, Object>> getVoterInfoByEmail(String email);
+
+    public ResponseEntity<String> updatePassword(String password, String email);
 }

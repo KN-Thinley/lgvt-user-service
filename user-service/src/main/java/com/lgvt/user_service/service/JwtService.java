@@ -23,17 +23,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    private String secretKey = "";
-
-    public JwtService() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk = keyGen.generateKey();
-            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error generating secret key", e);
-        }
-    }
+    private String secretKey = "thisismysecret19897donottouctouchit8329373743hhdjssmma89202";
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();

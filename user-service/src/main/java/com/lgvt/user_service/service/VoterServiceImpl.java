@@ -231,4 +231,39 @@ public class VoterServiceImpl implements VoterService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to resend OTP.");
         }
     }
+
+    public ResponseEntity<Map<String, Object>> getVoterInfoByEmail(String email) {
+        // Fetch voter by email
+        Voter voter = voterDAO.getVoterByEmail(email);
+
+        if (voter == null) {
+            // Return 404 if voter not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Voter not found"));
+        }
+
+        // Prepare selective fields to return
+        Map<String, Object> voterInfo = new HashMap<>();
+        voterInfo.put("name", voter.getName());
+        voterInfo.put("cid", voter.getCid());
+        voterInfo.put("email", voter.getEmail());
+        voterInfo.put("phone", voter.getPhone());
+        voterInfo.put("dzongkhag", voter.getDzongkhag());
+        voterInfo.put("gewog", voter.getGewog());
+        voterInfo.put("occupation", voter.getOccupation());
+
+        // Return the response
+        return ResponseEntity.ok(voterInfo);
+    }
+
+    public ResponseEntity<String> updatePassword(String password, String email) {
+        Voter existingVoter = voterDAO.getVoterByEmail(email);
+
+        if (existingVoter == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+
+        voterDAO.passwordReset(password, existingVoter);
+        return ResponseEntity.ok("Password has been successfully updated.");
+    }
 }
