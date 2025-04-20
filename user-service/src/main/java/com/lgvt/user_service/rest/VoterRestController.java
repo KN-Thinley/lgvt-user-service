@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,7 +93,7 @@ public class VoterRestController {
 
     @PostMapping("/voter/logout")
     public ResponseEntity<String> logout(@RequestBody Voter voter, HttpServletResponse response) {
-        return voterService.logout(voter,response);
+        return voterService.logout(voter, response);
     }
 
     @PostMapping("/voter/forgot-password")
@@ -133,5 +134,10 @@ public class VoterRestController {
     @PostMapping("/voter/resent-otp")
     public ResponseEntity<String> resentOTP(@RequestParam("token") String token, @RequestParam("type") String type) {
         return voterService.resentOTP(token, type);
+    }
+
+    @GetMapping("/voter/info")
+    public boolean getVoterInfo() {
+        return true;
     }
 }
