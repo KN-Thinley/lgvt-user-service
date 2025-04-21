@@ -266,4 +266,20 @@ public class VoterServiceImpl implements VoterService {
         voterDAO.passwordReset(password, existingVoter);
         return ResponseEntity.ok("Password has been successfully updated.");
     }
+
+    @Override
+    public String createSession(String email, HttpServletResponse response) {
+        // Load user details
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        // Generate JWT token
+        String token = jwtService.generateToken(userDetails);
+
+        // Set JWT as a cookie
+        Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+        jwtCookie.setHttpOnly(true); // Set the cookie path
+        response.addCookie(jwtCookie);
+
+        return token;
+    }
 }

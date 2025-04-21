@@ -109,4 +109,21 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
         int voter_id = secureToken.getVoter().getId();
         Voter voter = voterDAO.changeVoterLoginStatus(voter_id);
     }
+
+    @Transactional
+    @Override
+    public String getEmailFromToken(String token) {
+        SecureToken secureToken = secureTokenDAO.findByToken(token);
+
+        System.out.println("secureToken: " + secureToken);
+
+        if (secureToken == null) {
+            throw new RuntimeException("Invalid token. Please request a new one.");
+        }
+
+        System.out.println("Talop Email :" + secureToken.getVoter().getEmail());
+
+        // Extract email from the associated voter
+        return secureToken.getVoter().getEmail();
+    }
 }

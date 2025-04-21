@@ -8,6 +8,7 @@ import org.springframework.boot.actuate.autoconfigure.observation.ObservationPro
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,9 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.VerifyForgotPasswordResponse;
 import com.lgvt.user_service.entity.Voter;
+import com.lgvt.user_service.security.CustomDetailsService;
+import com.lgvt.user_service.service.JwtService;
 import com.lgvt.user_service.service.SecureTokenService;
 import com.lgvt.user_service.service.VoterService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -32,6 +36,10 @@ import jakarta.validation.Valid;
 public class VoterRestController {
     private VoterService voterService;
     private SecureTokenService secureTokenService;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private CustomDetailsService customUserDetailsService;
 
     @Autowired
     public VoterRestController(VoterService voterService, SecureTokenService secureTokenService) {
@@ -76,14 +84,21 @@ public class VoterRestController {
         return voterService.loginVoter(voter, response);
     }
 
+    // MFA
     @PostMapping("/voter/verify-login-otp")
-    public ResponseEntity<String> verifyLoginOTP(@RequestParam("otp") int otp, @RequestParam("token") String token) {
+    public ResponseEntity<String> verifyLoginOTP(@RequestParam("otp") int otp, @RequestParam("token") String token,
+            HttpServletResponse response) {
         try {
             boolean isVerified = secureTokenService.verifyOtp(otp, token);
             if (isVerified) {
                 secureTokenService.changeVoterLoginStatus(token);
                 secureTokenService.removeToken(token);
-                return ResponseEntity.ok("OTP is verified");
+
+                // Create session
+                String email = secureTokenService.getEmailFromToken(token); // Assuming you have a method to extract //                                                       // // email
+                voterService.createSession(email, response);
+
+                return ResponseEntity.ok(token);
             } else {
                 return ResponseEntity.badRequest().body("Invalid OTP");
             }

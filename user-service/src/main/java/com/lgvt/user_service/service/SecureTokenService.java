@@ -17,4 +17,6 @@ public interface SecureTokenService {
     void changeVoterStatus(String token);
 
     void changeVoterLoginStatus(String token);
+
+    String getEmailFromToken(String token);
 }
