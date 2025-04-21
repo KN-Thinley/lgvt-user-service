@@ -84,7 +84,7 @@ public class VoterServiceImpl implements VoterService {
                 if (existingVoter.isVerified()) {
                     // Check if the user has done MFA
                     if (existingVoter.isLogged_in()) {
-                        
+
                         UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
                         String token = jwtService.generateToken(userDetails);
 
@@ -134,12 +134,12 @@ public class VoterServiceImpl implements VoterService {
         }
     }
 
-    public ResponseEntity<String> logout(Voter voter, HttpServletResponse response) {
+    public ResponseEntity<String> logout(String email, HttpServletResponse response) {
         // Check if the user exists
         // Check if the user is logged in
         // If the user is logged in then change the status of the login to false
 
-        Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
+        Voter existingVoter = voterDAO.getVoterByEmail(email);
 
         if (existingVoter != null) {
             if (existingVoter.isLogged_in()) {

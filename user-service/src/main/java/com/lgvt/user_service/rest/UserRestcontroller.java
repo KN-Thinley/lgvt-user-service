@@ -2,6 +2,7 @@ package com.lgvt.user_service.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +29,11 @@ public class UserRestcontroller {
     @PostMapping("/user/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody User user, HttpServletResponse response) {
         return userService.login(user, response);
+    }
+
+    @PostMapping("/user/logout")
+    public ResponseEntity<String> logoutUser(Authentication authentication, HttpServletResponse response) {
+        String email = authentication.getName();
+        return userService.logout(email, response);
     }
 }

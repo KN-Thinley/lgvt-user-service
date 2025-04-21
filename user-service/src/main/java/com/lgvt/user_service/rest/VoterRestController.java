@@ -93,8 +93,9 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/logout")
-    public ResponseEntity<String> logout(@RequestBody Voter voter, HttpServletResponse response) {
-        return voterService.logout(voter, response);
+    public ResponseEntity<String> logout(Authentication authentication, HttpServletResponse response) {
+        String email = authentication.getName();
+        return voterService.logout(email, response);
     }
 
     @PostMapping("/voter/forgot-password")

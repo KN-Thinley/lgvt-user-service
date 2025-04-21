@@ -43,7 +43,8 @@ public class SecurityConfig {
                         "/api/auth/voter/verify-forgot-password-otp", "/api/auth/voter/reset-password",
                         "/api/auth/voter/resent-otp", "/api/auth/user/register", "/api/auth/user/login")
                 .permitAll()
-                // .requestMatchers("/hello").hasAuthority("ADMIN")
+                .requestMatchers("/api/auth/voter/login").hasAuthority("VOTER")
+                .requestMatchers("/api/auth/user/login").hasAnyAuthority("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated());
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session

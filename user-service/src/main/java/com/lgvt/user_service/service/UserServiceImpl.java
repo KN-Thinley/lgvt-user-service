@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.entity.User;
+import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.security.CustomDetailsService;
 
 import jakarta.servlet.http.Cookie;
@@ -58,7 +59,8 @@ public class UserServiceImpl implements UserService {
 
         if (existingUser != null) {
             // Authenticate the user
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
             if (authentication.isAuthenticated()) {
                 // Generate JWT token
@@ -93,4 +95,22 @@ public class UserServiceImpl implements UserService {
                     "register_user"));
         }
     }
+
+    public ResponseEntity<String> logout(String email, HttpServletResponse response) {
+
+        User existingVoter = userDAO.getUserByEmail(email);
+
+        if (existingVoter != null) {
+            // ་Cookie Clearing
+            Cookie jwtCookie = new Cookie("JWT-TOKEN", null);
+            jwtCookie.setMaxAge(0);
+            response.addCookie(jwtCookie);
+            return ResponseEntity.ok().build();
+
+        } else {
+            // User is not logged in
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
+        }
+    }
+
 }
