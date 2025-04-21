@@ -5,4 +5,8 @@ import com.lgvt.user_service.entity.Voter;
 
 public interface UserDAO {
     User getUserByEmail(String email);
+
+    User saveUser(User user);
+
+    boolean userExistsByEmail(String email);
 }

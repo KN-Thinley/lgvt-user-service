@@ -84,7 +84,7 @@ public class VoterServiceImpl implements VoterService {
                 if (existingVoter.isVerified()) {
                     // Check if the user has done MFA
                     if (existingVoter.isLogged_in()) {
-
+                        
                         UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
                         String token = jwtService.generateToken(userDetails);
 
