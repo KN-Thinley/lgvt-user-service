@@ -84,26 +84,40 @@ public class VoterRestController {
         return voterService.loginVoter(voter, response);
     }
 
-    // MFA
     @PostMapping("/voter/verify-login-otp")
-    public ResponseEntity<String> verifyLoginOTP(@RequestParam("otp") int otp, @RequestParam("token") String token,
+    public ResponseEntity<Map<String, String>> verifyLoginOTP(@RequestParam("otp") int otp,
+            @RequestParam("token") String token,
             HttpServletResponse response) {
         try {
             boolean isVerified = secureTokenService.verifyOtp(otp, token);
             if (isVerified) {
                 secureTokenService.changeVoterLoginStatus(token);
-                secureTokenService.removeToken(token);
 
-                // Create session
-                String email = secureTokenService.getEmailFromToken(token); // Assuming you have a method to extract //                                                       // // email
-                voterService.createSession(email, response);
+                // Create Session
+                String email = secureTokenService.getEmailFromToken(token); // Extract email from token
+                String sessionToken = voterService.createSession(email, response);
 
-                return ResponseEntity.ok(token);
+                // Remove Token
+                secureTokenService.removeToken(sessionToken);
+
+                // Prepare response object
+                Map<String, String> responseBody = new HashMap<>();
+                responseBody.put("message", "OTP verified successfully");
+                responseBody.put("session_token", sessionToken);
+
+                // Return response
+                return ResponseEntity.ok(responseBody);
             } else {
-                return ResponseEntity.badRequest().body("Invalid OTP");
+                // Prepare error response
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Invalid OTP");
+                return ResponseEntity.badRequest().body(errorResponse);
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            // Prepare error response
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
