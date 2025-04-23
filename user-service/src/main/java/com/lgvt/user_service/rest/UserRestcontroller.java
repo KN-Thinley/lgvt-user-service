@@ -24,7 +24,7 @@ public class UserRestcontroller {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/user/register")
+    @PostMapping("/super-user/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         return userService.saveUser(user);
 
@@ -47,7 +47,7 @@ public class UserRestcontroller {
         return userService.updatePassword(password, email);
     }
 
-    @GetMapping("/user/info")
+    @GetMapping("/super-user/info")
     public ResponseEntity<Map<String, Object>> getVoterInfo(Authentication authentication) {
         String email = authentication.getName();
         return userService.getUserInfoByEmail(email);

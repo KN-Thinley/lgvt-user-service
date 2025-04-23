@@ -67,7 +67,7 @@ public class VoterRestController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/verify-otp")
+    @PostMapping("/voter/verify-otp")
     public ResponseEntity<String> verifyOTP(@RequestParam("otp") int otp, @RequestParam("token") String token) {
         try {
             boolean isVerified = secureTokenService.verifyOtp(otp, token);
@@ -90,7 +90,7 @@ public class VoterRestController {
         return voterService.loginVoter(voter, response);
     }
 
-    @PostMapping("/voter/verify-login-otp")
+    @PostMapping("/verify-login-otp")
     public ResponseEntity<Map<String, String>> verifyLoginOTP(@RequestParam("otp") int otp,
             @RequestParam("token") String token,
             HttpServletResponse response) {
@@ -136,13 +136,13 @@ public class VoterRestController {
         return voterService.logout(email, response);
     }
 
-    @PostMapping("/voter/forgot-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email"); // Extract the email from the request body
         return voterService.forgotPassword(email);
     }
 
-    @PostMapping("/voter/verify-forgot-password-otp")
+    @PostMapping("/verify-forgot-password-otp")
     public ResponseEntity<VerifyForgotPasswordResponse> verifyForgotPasswordOTP(@RequestParam("otp") int otp,
             @RequestParam("token") String token) {
 
@@ -162,7 +162,7 @@ public class VoterRestController {
         }
     }
 
-    @PostMapping("/voter/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request,
             @RequestParam("token") String token) {
         // Extract the password from the request body
@@ -172,7 +172,7 @@ public class VoterRestController {
         return voterService.resetPassword(password, token);
     }
 
-    @PostMapping("/voter/resent-otp")
+    @PostMapping("/resent-otp")
     public ResponseEntity<String> resentOTP(@RequestParam("token") String token, @RequestParam("type") String type) {
         return voterService.resentOTP(token, type);
     }

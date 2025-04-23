@@ -39,13 +39,14 @@ public class SecurityConfig {
         httpSecurity.csrf(customizer -> customizer.disable());
         httpSecurity.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/api/auth/voter/register", "/api/auth/voter/login",
-                        "/api/auth/voter/verify-login-otp", "/api/auth/verify-otp", "/api/auth/voter/forgot-password",
-                        "/api/auth/voter/verify-forgot-password-otp",
-                        "/api/auth/voter/resent-otp", "/api/auth/user/register", "/api/auth/user/login")
+                        "/api/auth/verify-login-otp", "/api/auth/voter/verify-otp", "/api/auth/forgot-password",
+                        "/api/auth/verify-forgot-password-otp", "/api/auth/resent-otp",
+                        "/api/auth/voter/login", "/api/auth/user/login", "/api/auth/reset-password")
                 .permitAll()
-                .requestMatchers("/api/auth/voter/login", "/api/auth/voter/reset-password").hasAuthority("VOTER")
-                .requestMatchers("/api/auth/user/info").hasAuthority("SUPER_ADMIN")
-                .requestMatchers("/api/auth/user/login", "/api/auth/user/reset-password")
+                .requestMatchers("/api/auth/voter/update-password").hasAuthority("VOTER")
+                .requestMatchers("/api/auth/super-user/info", "/api/auth/super-user/register")
+                .hasAuthority("SUPER_ADMIN")
+                .requestMatchers("/api/auth/user/reset-password", "/api/auth/user/logout")
                 .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated());
         httpSecurity.httpBasic(Customizer.withDefaults());
