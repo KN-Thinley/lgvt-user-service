@@ -103,7 +103,7 @@ public class VoterServiceImpl implements VoterService {
                         // Redirect to MFA page
                         String token = voterDAO.sendLoginMFAEmail(existingVoter);
                         // Generate and send a email
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
+                        return ResponseEntity.ok(new LoginResponse(
                                 "Multifactor Authentication needed",
                                 token,
                                 false,

@@ -2,6 +2,7 @@ package com.lgvt.user_service.utils;
 
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.Voter;
 
 public class MFAEmailContext extends AbstractEmailContext {
@@ -10,7 +11,7 @@ public class MFAEmailContext extends AbstractEmailContext {
 
     @Override
     public <T> void init(T context) {
-        Voter user = (Voter) context;
+        GeneralUser user = (GeneralUser) context;
 
         put("name", user.getName());
         setSubject("Login Request Verification Code");

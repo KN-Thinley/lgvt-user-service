@@ -1,5 +1,6 @@
 package com.lgvt.user_service.dao;
 
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 
@@ -10,7 +11,7 @@ public interface VoterDAO {
 
     String sendRegistrationConfirmationEmail(Voter voter);
 
-    String sendLoginMFAEmail(Voter voter);
+    String sendLoginMFAEmail(GeneralUser user);
 
     String sendForgotPasswordEmail(Voter voter);
 

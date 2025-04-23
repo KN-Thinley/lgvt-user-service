@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.service.EmailService;
@@ -92,18 +93,16 @@ public class VoterDAOImpl implements VoterDAO {
     }
 
     @Override
-    public String sendLoginMFAEmail(Voter voter) {
+    public String sendLoginMFAEmail(GeneralUser user) {
         // Create a secure token
-        SecureToken secureToken = secureTokenService.createToken(voter);
+        SecureToken secureToken = secureTokenService.createToken(user);
 
         // Save the secure token
         secureTokenService.saveSecureToken(secureToken);
 
-        System.out.println("Secure token: " + secureToken.getToken());
-
         // Prepare the email context
         MFAEmailContext emailContext = new MFAEmailContext();
-        emailContext.init(voter);
+        emailContext.init(user);
         emailContext.setToken(secureToken.getToken());
         emailContext.setOtp(secureToken.getOtp());
         emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.dao.UserDAO;
+import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.security.CustomDetailsService;
@@ -25,6 +26,8 @@ import lombok.Data;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserDAO userDAO;
+    @Autowired
+    private VoterDAO voterDAO;
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -63,18 +66,11 @@ public class UserServiceImpl implements UserService {
                     .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
             if (authentication.isAuthenticated()) {
-                // Generate JWT token
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getEmail());
-                String token = jwtService.generateToken(userDetails);
-
-                // Set JWT as a cookie
-                Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
-                jwtCookie.setHttpOnly(true);
-                response.addCookie(jwtCookie);
+                String token = voterDAO.sendLoginMFAEmail(existingUser);
 
                 // Return success response
                 return ResponseEntity.ok(new LoginResponse(
-                        "Login successful",
+                        "Successful Send A MFA Email",
                         token,
                         true,
                         "proceed"));
@@ -112,5 +108,4 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
         }
     }
-
 }

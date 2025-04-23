@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.VerifyForgotPasswordResponse;
+import com.lgvt.user_service.dao.SecureTokenDAO;
+import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.security.CustomDetailsService;
 import com.lgvt.user_service.service.JwtService;
@@ -40,6 +42,8 @@ public class VoterRestController {
     private JwtService jwtService;
     @Autowired
     private CustomDetailsService customUserDetailsService;
+    @Autowired
+    private SecureTokenDAO secureTokenDAO;
 
     @Autowired
     public VoterRestController(VoterService voterService, SecureTokenService secureTokenService) {
@@ -93,7 +97,10 @@ public class VoterRestController {
         try {
             boolean isVerified = secureTokenService.verifyOtp(otp, token);
             if (isVerified) {
-                secureTokenService.changeVoterLoginStatus(token);
+                SecureToken secureToken = secureTokenDAO.findByToken(token);
+                if (secureToken.getVoter() != null) {
+                    secureTokenService.changeVoterLoginStatus(token);
+                }
 
                 // Create Session
                 String email = secureTokenService.getEmailFromToken(token); // Extract email from token
