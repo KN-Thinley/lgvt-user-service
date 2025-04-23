@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lgvt.user_service.Response.LoginResponse;
@@ -35,5 +36,11 @@ public class UserRestcontroller {
     public ResponseEntity<String> logoutUser(Authentication authentication, HttpServletResponse response) {
         String email = authentication.getName();
         return userService.logout(email, response);
+    }
+
+    @PostMapping("/user/update-password")
+    public ResponseEntity<String> updatePassword(@RequestParam String password, Authentication authentication) {
+        String email = authentication.getName();
+        return userService.updatePassword(password, email);
     }
 }

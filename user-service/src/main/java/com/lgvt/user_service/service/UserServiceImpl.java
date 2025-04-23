@@ -108,4 +108,15 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
         }
     }
+
+    public ResponseEntity<String> updatePassword(String password, String email) {
+        User existingUser = userDAO.getUserByEmail(email);
+
+        if (existingUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+
+        userDAO.passwordReset(password, existingUser);
+        return ResponseEntity.ok("Password has been successfully updated.");
+    }
 }

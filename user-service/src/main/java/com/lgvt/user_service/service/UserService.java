@@ -15,4 +15,5 @@ public interface UserService {
 
     ResponseEntity<String> logout(String email, HttpServletResponse response);
 
+    public ResponseEntity<String> updatePassword(String password, String email);
 }
