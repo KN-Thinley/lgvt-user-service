@@ -1,5 +1,7 @@
 package com.lgvt.user_service.service;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 
 import com.lgvt.user_service.Response.LoginResponse;
@@ -16,4 +18,6 @@ public interface UserService {
     ResponseEntity<String> logout(String email, HttpServletResponse response);
 
     public ResponseEntity<String> updatePassword(String password, String email);
+
+    ResponseEntity<Map<String, Object>> getUserInfoByEmail(String email);
 }

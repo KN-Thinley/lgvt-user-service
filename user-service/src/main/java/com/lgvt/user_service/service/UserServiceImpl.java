@@ -1,5 +1,8 @@
 package com.lgvt.user_service.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -119,4 +122,25 @@ public class UserServiceImpl implements UserService {
         userDAO.passwordReset(password, existingUser);
         return ResponseEntity.ok("Password has been successfully updated.");
     }
+
+    public ResponseEntity<Map<String, Object>> getUserInfoByEmail(String email) {
+        // Fetch voter by email
+        User user = userDAO.getUserByEmail(email);
+
+        if (user == null) {
+            // Return 404 if voter not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Voter not found"));
+        }
+
+        // Prepare selective fields to return
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("name", user.getName());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("phone", user.getPhone());
+
+        // Return the response
+        return ResponseEntity.ok(userInfo);
+    }
+
 }

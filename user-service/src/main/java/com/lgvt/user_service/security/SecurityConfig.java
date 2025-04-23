@@ -44,7 +44,9 @@ public class SecurityConfig {
                         "/api/auth/voter/resent-otp", "/api/auth/user/register", "/api/auth/user/login")
                 .permitAll()
                 .requestMatchers("/api/auth/voter/login", "/api/auth/voter/reset-password").hasAuthority("VOTER")
-                .requestMatchers("/api/auth/user/login", "/api/auth/user/reset-password").hasAnyAuthority("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/user/info").hasAuthority("SUPER_ADMIN")
+                .requestMatchers("/api/auth/user/login", "/api/auth/user/reset-password")
+                .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated());
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session
