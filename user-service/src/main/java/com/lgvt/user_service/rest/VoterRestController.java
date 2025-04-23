@@ -69,7 +69,9 @@ public class VoterRestController {
             boolean isVerified = secureTokenService.verifyOtp(otp, token);
             if (isVerified) {
                 secureTokenService.changeVoterStatus(token);
+                System.out.println("Voter status changed successfully");
                 secureTokenService.removeToken(token);
+                System.out.println("Token removed successfully");
                 return ResponseEntity.ok("OTP is verified");
             } else {
                 return ResponseEntity.badRequest().body("Invalid OTP");

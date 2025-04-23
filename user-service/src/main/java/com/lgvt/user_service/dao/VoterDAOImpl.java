@@ -166,7 +166,12 @@ public class VoterDAOImpl implements VoterDAO {
             emailContext = new ForgotPasswordContext();
         }
 
-        emailContext.init(secureToken.getVoter());
+        if (secureToken.getUser() != null) {
+            emailContext.init(secureToken.getUser());
+        } else {
+            emailContext.init(secureToken.getVoter());
+
+        }
         emailContext.setToken(secureToken.getToken());
         emailContext.setOtp(secureToken.getOtp());
         emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());

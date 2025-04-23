@@ -1,10 +1,11 @@
 package com.lgvt.user_service.service;
 
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 
 public interface SecureTokenService {
-    SecureToken createToken(Voter voter);
+    SecureToken createToken(GeneralUser user);
 
     void saveSecureToken(SecureToken secureToken);
 

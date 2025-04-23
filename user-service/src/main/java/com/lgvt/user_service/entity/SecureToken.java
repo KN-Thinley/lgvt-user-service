@@ -29,8 +29,12 @@ public class SecureToken {
     private LocalDateTime expireAt;
 
     @ManyToOne
-    @JoinColumn(name = "voter_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "voter_id", referencedColumnName = "id")
     private Voter voter;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @Column(nullable = false, length = 6) // Add OTP field
     private int otp; // Store the OTP for email verification

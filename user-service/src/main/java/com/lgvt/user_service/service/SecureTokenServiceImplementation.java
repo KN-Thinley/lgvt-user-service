@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.lgvt.user_service.dao.SecureTokenDAO;
 import com.lgvt.user_service.dao.VoterDAO;
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
+import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.Voter;
 
 import jakarta.transaction.Transactional;
@@ -30,17 +32,36 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
 
     @Transactional
     @Override
-    public SecureToken createToken(Voter voter) {
-        String tokenValue = new String(Base64.getEncoder().encode(DEFAULT_TOKEN_GENERATOR.generateKey()));
+    public SecureToken createToken(GeneralUser user) {
+        // Generate an alphanumeric token
+        String tokenValue = generateAlphanumericToken(16); // 16 is the desired token length
         int otpValue = (int) (Math.random() * 900000) + 10000;
 
         SecureToken secureToken = new SecureToken();
         secureToken.setToken(tokenValue);
         secureToken.setOtp(otpValue);
         secureToken.setExpireAt(LocalDateTime.now().plusSeconds(tokenValidatyInSeconds));
-        secureToken.setVoter(voter);
+
+        if (user instanceof Voter) {
+            secureToken.setVoter((Voter) user);
+        } else if (user instanceof User) {
+            secureToken.setUser((User) user);
+        } else {
+            throw new IllegalArgumentException("Unsupported user type");
+        }
+
         this.saveSecureToken(secureToken);
         return secureToken;
+    }
+
+    private String generateAlphanumericToken(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder token = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * characters.length());
+            token.append(characters.charAt(index));
+        }
+        return token.toString();
     }
 
     @Transactional
@@ -53,7 +74,6 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     @Override
     public SecureToken findByToken(String token) {
         Exception e = new Exception(); // Capture stack trace
-        System.out.println("Finding token: " + token);
         e.printStackTrace();
         if (token == null || token.isEmpty()) {
             throw new RuntimeException("Token is null or empty");
@@ -72,8 +92,6 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     public boolean verifyOtp(int otp, String token) {
         SecureToken secureToken = secureTokenDAO.findByToken(token);
 
-        boolean isValid = false;
-
         if (secureToken == null) {
             throw new RuntimeException("Invalid token. Please request a new one.");
         }
@@ -85,7 +103,6 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
 
         // Verify OTP
         if (secureToken.getOtp() == otp) {
-            System.out.println(token);
             return true;
         } else {
             throw new RuntimeException("Invalid OTP. Please try again.");
@@ -96,10 +113,8 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     @Override
     public void changeVoterStatus(String token) {
         SecureToken secureToken = secureTokenDAO.findByToken(token);
-        System.out.println("token: " + token);
-        System.out.println("secureToken: " + secureToken);
-        int voter_id = secureToken.getVoter().getId();
-        Voter voter = voterDAO.changeVoterStatus(voter_id);
+        int user_id = secureToken.getVoter().getId();
+        Voter voter = voterDAO.changeVoterStatus(user_id);
     }
 
     @Transactional
@@ -115,15 +130,19 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
     public String getEmailFromToken(String token) {
         SecureToken secureToken = secureTokenDAO.findByToken(token);
 
-        System.out.println("secureToken: " + secureToken);
-
         if (secureToken == null) {
             throw new RuntimeException("Invalid token. Please request a new one.");
         }
 
-        System.out.println("Talop Email :" + secureToken.getVoter().getEmail());
+        System.out.println("secureToken: " + secureToken);
 
         // Extract email from the associated voter
-        return secureToken.getVoter().getEmail();
+        if (secureToken.getVoter() != null) {
+            return secureToken.getVoter().getEmail();
+        } else if (secureToken.getUser() != null) {
+            return secureToken.getUser().getEmail();
+        } else {
+            throw new RuntimeException("No associated user found for the token.");
+        }
     }
 }

@@ -1,11 +1,18 @@
 package com.lgvt.user_service.entity;
 
-public interface GeneralUser {
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
 
-    String getPassword();
+@MappedSuperclass
+public abstract class GeneralUser {
 
-    String getEmail();
+    public abstract String getPassword();
 
-    Role getRole();
-    
+    public abstract String getEmail();
+
+    public abstract Role getRole();
+
+    public abstract int getId();
+
+    public abstract Object getName();
 }

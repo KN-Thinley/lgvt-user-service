@@ -19,6 +19,7 @@ import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.dao.CidDocument;
 import com.lgvt.user_service.dao.VoterDAO;
+import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.exception.UserAlreadyExistException;
@@ -196,15 +197,23 @@ public class VoterServiceImpl implements VoterService {
         }
 
         // Retrieve the associated Voter using the token
-        Voter existingVoter = secureToken.getVoter();
-        System.out.println("Existing Voter: " + existingVoter);
+        GeneralUser existingVoter = null;
+        if (secureToken.getVoter() != null) {
+            existingVoter = secureToken.getVoter();
+        } else {
+            existingVoter = secureToken.getUser();
+        }
 
         if (existingVoter == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No voter associated with this token.");
         }
 
         // Pass the voter's old password to the passwordReset method
-        voterDAO.passwordReset(password, existingVoter);
+        if (existingVoter instanceof Voter) {
+            voterDAO.passwordReset(password, (Voter) existingVoter);
+        } else {
+            // Code for the Admin and SuperAdmin
+        }
 
         // Remove the token after successful password reset
         secureTokenService.removeToken(token);
