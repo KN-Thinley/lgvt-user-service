@@ -13,7 +13,7 @@ public interface VoterDAO {
 
     String sendLoginMFAEmail(GeneralUser user);
 
-    String sendForgotPasswordEmail(Voter voter);
+    String sendForgotPasswordEmail(GeneralUser user);
 
     Voter changeVoterStatus(int id);
 
@@ -27,5 +27,5 @@ public interface VoterDAO {
 
     void passwordReset(String password, Voter voter);
 
-    String resentOTP(SecureToken secureToken,String type);
+    String resentOTP(SecureToken secureToken, String type);
 }

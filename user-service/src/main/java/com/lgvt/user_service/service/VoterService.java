@@ -18,7 +18,7 @@ public interface VoterService {
 
     ResponseEntity<String> logout(String email, HttpServletResponse response);
 
-    ResponseEntity<ForgotPasswordResponse> forgotPassword(Voter voter);
+    ResponseEntity<ForgotPasswordResponse> forgotPassword(String email);
 
     ResponseEntity<String> resetPassword(String password, String token);
 

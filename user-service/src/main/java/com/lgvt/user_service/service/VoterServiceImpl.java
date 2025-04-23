@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.dao.CidDocument;
+import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
@@ -46,6 +47,9 @@ public class VoterServiceImpl implements VoterService {
     private JwtService jwtService;
     @Autowired
     private CustomDetailsService customUserDetailsService;
+
+    @Autowired
+    private UserDAO userDAO;
 
     @Override
     @Transactional
@@ -162,17 +166,22 @@ public class VoterServiceImpl implements VoterService {
         }
     }
 
-    public ResponseEntity<ForgotPasswordResponse> forgotPassword(Voter voter) {
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(String email) {
         // Check if the user exists
-        Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
-        if (existingVoter == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ForgotPasswordResponse("User with the provided email does not exist.", null));
+        GeneralUser existingUser = null;
+        existingUser = voterDAO.getVoterByEmail(email);
+
+        if (existingUser == null) {
+            existingUser = userDAO.getUserByEmail(email);
+        }
+
+        if (existingUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ForgotPasswordResponse("User with the provided email does not exist.", null));
         }
 
         // Use voterDAO to send the OTP and email
         try {
-            String token = voterDAO.sendForgotPasswordEmail(existingVoter);
+            String token = voterDAO.sendForgotPasswordEmail(existingUser);
             // Return a success response with the token
             return ResponseEntity.ok(new ForgotPasswordResponse(
                     "OTP has been sent to your email. Use the token for further verification.", token));

@@ -122,18 +122,16 @@ public class VoterDAOImpl implements VoterDAO {
     }
 
     @Override
-    public String sendForgotPasswordEmail(Voter voter) {
+    public String sendForgotPasswordEmail(GeneralUser user) {
         // Create a secure token
-        SecureToken secureToken = secureTokenService.createToken(voter);
+        SecureToken secureToken = secureTokenService.createToken(user);
 
         // Save the secure token
         secureTokenService.saveSecureToken(secureToken);
 
-        System.out.println("Secure token: " + secureToken.getToken());
-
         // Prepare the email context
         ForgotPasswordContext emailContext = new ForgotPasswordContext();
-        emailContext.init(voter);
+        emailContext.init(user);
         emailContext.setToken(secureToken.getToken());
         emailContext.setOtp(secureToken.getOtp());
         emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());

@@ -137,8 +137,9 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/forgot-password")
-    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody Voter voter) {
-        return voterService.forgotPassword(voter);
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email"); // Extract the email from the request body
+        return voterService.forgotPassword(email);
     }
 
     @PostMapping("/voter/verify-forgot-password-otp")
