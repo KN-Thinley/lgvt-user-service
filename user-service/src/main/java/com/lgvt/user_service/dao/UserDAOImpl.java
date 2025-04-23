@@ -58,4 +58,17 @@ public class UserDAOImpl implements UserDAO {
             return false; // Return false in case of any unexpected exception
         }
     }
+
+    @Override
+    @Transactional
+    public void passwordReset(String password, User user) {
+        // Encrypt the new password
+        String encryptedPassword = passwordEncoder.encode(password);
+
+        // // Update the voter's password
+        user.setPassword(encryptedPassword);
+
+        // Save the updated voter entity
+        entityManager.merge(user);
+    }
 }

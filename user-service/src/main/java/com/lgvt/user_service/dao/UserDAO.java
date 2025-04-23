@@ -9,4 +9,6 @@ public interface UserDAO {
     User saveUser(User user);
 
     boolean userExistsByEmail(String email);
+
+    void passwordReset(String password, User user);
 }

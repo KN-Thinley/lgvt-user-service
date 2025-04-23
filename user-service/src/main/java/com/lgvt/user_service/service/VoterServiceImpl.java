@@ -22,6 +22,7 @@ import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
+import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.exception.UserAlreadyExistException;
 import com.lgvt.user_service.security.CustomDetailsService;
@@ -47,7 +48,6 @@ public class VoterServiceImpl implements VoterService {
     private JwtService jwtService;
     @Autowired
     private CustomDetailsService customUserDetailsService;
-
     @Autowired
     private UserDAO userDAO;
 
@@ -176,7 +176,8 @@ public class VoterServiceImpl implements VoterService {
         }
 
         if (existingUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ForgotPasswordResponse("User with the provided email does not exist.", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ForgotPasswordResponse("User with the provided email does not exist.", null));
         }
 
         // Use voterDAO to send the OTP and email
@@ -222,6 +223,7 @@ public class VoterServiceImpl implements VoterService {
             voterDAO.passwordReset(password, (Voter) existingVoter);
         } else {
             // Code for the Admin and SuperAdmin
+            userDAO.passwordReset(password, (User) existingVoter);
         }
 
         // Remove the token after successful password reset
