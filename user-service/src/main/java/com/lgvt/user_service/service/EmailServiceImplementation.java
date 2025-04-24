@@ -26,7 +26,7 @@ public class EmailServiceImplementation implements EmailService {
     // Create the email content manually
     String emailContent = "<html><body>"
         + "<h1>Welcome, " + email.getContext().get("name") + " !</h1>"
-        + "<p>Thank you for registering. Please click the link below to verify your email:</p>"
+        + "<p>Thank you for registering.</p>"
         + "<p>Your verification code is: <b>" + email.getOtp() + "</b></p>"
         + "</body></html>";
 
