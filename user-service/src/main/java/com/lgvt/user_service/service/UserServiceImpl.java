@@ -76,14 +76,15 @@ public class UserServiceImpl implements UserService {
                         "Successful Send A MFA Email",
                         token,
                         true,
-                        "proceed"));
+                        "proceed",
+                        null));
             } else {
                 // Password is incorrect
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
                         "Incorrect password",
                         null,
                         false,
-                        "retry_login"));
+                        "retry_login",null));
             }
         } else {
             // User does not exist
@@ -91,7 +92,7 @@ public class UserServiceImpl implements UserService {
                     "User does not exist",
                     null,
                     false,
-                    "register_user"));
+                    "register_user",null));
         }
     }
 

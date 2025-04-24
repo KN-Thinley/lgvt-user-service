@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.LoginResponse;
+import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.dao.CidDocument;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
@@ -98,11 +99,19 @@ public class VoterServiceImpl implements VoterService {
                         jwtCookie.setHttpOnly(true);
                         response.addCookie(jwtCookie);
 
+                        // Create UserInfo object
+                        LoginUserInfo userInfo = new LoginUserInfo(
+                                existingVoter.getId(),
+                                existingVoter.getEmail(),
+                                existingVoter.getName(),
+                                existingVoter.getRole().toString());
+
                         return ResponseEntity.ok(new LoginResponse(
                                 "Login successful",
                                 token,
                                 true,
-                                "proceed"));
+                                "proceed",
+                                userInfo));
                     } else {
                         // Redirect to MFA page
                         String token = voterDAO.sendLoginMFAEmail(existingVoter);
@@ -111,7 +120,7 @@ public class VoterServiceImpl implements VoterService {
                                 "Multifactor Authentication needed",
                                 token,
                                 false,
-                                "redirect_to_mfa"));
+                                "redirect_to_mfa", null));
                     }
                 } else {
                     // User is not verified
@@ -119,7 +128,7 @@ public class VoterServiceImpl implements VoterService {
                             "User is not verified",
                             null,
                             false,
-                            "verify_user"));
+                            "verify_user", null));
                 }
             } else {
                 // Password is incorrect
@@ -127,7 +136,8 @@ public class VoterServiceImpl implements VoterService {
                         "Incorrect password",
                         null,
                         false,
-                        "retry_login"));
+                        "retry_login",
+                        null));
             }
         } else {
             // User does not exist
@@ -135,7 +145,7 @@ public class VoterServiceImpl implements VoterService {
                     "User does not exist",
                     null,
                     false,
-                    "register_user"));
+                    "register_user", null));
         }
     }
 
