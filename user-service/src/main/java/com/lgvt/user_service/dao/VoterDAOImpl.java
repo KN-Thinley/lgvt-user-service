@@ -1,5 +1,8 @@
 package com.lgvt.user_service.dao;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -251,5 +254,22 @@ public class VoterDAOImpl implements VoterDAO {
 
         // Save the updated voter entity
         entityManager.merge(voter);
+    }
+
+    @Override
+    public long getTotalVoterCount() {
+        String query = "SELECT COUNT(v) FROM Voter v";
+        return entityManager.createQuery(query, Long.class).getSingleResult();
+    }
+
+    @Override
+    public long getTotalVotersRegisteredToday() {
+        String query = "SELECT COUNT(v) FROM Voter v WHERE v.createdAt >= :startOfDay AND v.createdAt < :endOfDay";
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        return entityManager.createQuery(query, Long.class)
+                .setParameter("startOfDay", startOfDay)
+                .setParameter("endOfDay", endOfDay)
+                .getSingleResult();
     }
 }

@@ -20,4 +20,6 @@ public interface UserService {
     public ResponseEntity<String> updatePassword(String password, String email);
 
     ResponseEntity<Map<String, Object>> getUserInfoByEmail(String email);
+
+    Map<String, Long> getSystemStatistics();
 }

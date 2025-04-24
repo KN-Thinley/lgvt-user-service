@@ -11,4 +11,6 @@ public interface UserDAO {
     boolean userExistsByEmail(String email);
 
     void passwordReset(String password, User user);
+
+    long getTotalUserCount();
 }

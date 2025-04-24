@@ -28,4 +28,8 @@ public interface VoterDAO {
     void passwordReset(String password, Voter voter);
 
     String resentOTP(SecureToken secureToken, String type);
+
+    long getTotalVoterCount();
+
+    long getTotalVotersRegisteredToday();
 }

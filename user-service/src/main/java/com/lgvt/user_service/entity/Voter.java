@@ -2,7 +2,9 @@ package com.lgvt.user_service.entity;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lgvt.user_service.dao.CidDocument;
@@ -81,6 +83,9 @@ public class Voter extends GeneralUser {
     @Column(name = "occupation", nullable = false)
     @NotBlank(message = "Occupation is required")
     private String occupation;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // Custom validation method to ensure age is 18 or older
     @AssertTrue(message = "Voter must be at least 18 years old")

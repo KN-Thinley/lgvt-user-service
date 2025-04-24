@@ -75,8 +75,8 @@ public class UserServiceImpl implements UserService {
                 return ResponseEntity.ok(new LoginResponse(
                         "Successful Send A MFA Email",
                         token,
-                        true,
-                        "proceed",
+                        false,
+                        "redirect_to_mfa",
                         null));
             } else {
                 // Password is incorrect
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
                         "Incorrect password",
                         null,
                         false,
-                        "retry_login",null));
+                        "retry_login", null));
             }
         } else {
             // User does not exist
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
                     "User does not exist",
                     null,
                     false,
-                    "register_user",null));
+                    "register_user", null));
         }
     }
 
@@ -144,4 +144,19 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok(userInfo);
     }
 
+    @Override
+    public Map<String, Long> getSystemStatistics() {
+        // Fetch data from DAO methods
+        long totalVoters = voterDAO.getTotalVoterCount();
+        long totalVotersToday = voterDAO.getTotalVotersRegisteredToday();
+        long totalUsers = userDAO.getTotalUserCount();
+
+        // Combine results into a map
+        Map<String, Long> statistics = new HashMap<>();
+        statistics.put("totalVoters", totalVoters);
+        statistics.put("totalVotersToday", totalVotersToday);
+        statistics.put("totalUsers", totalUsers);
+
+        return statistics;
+    }
 }

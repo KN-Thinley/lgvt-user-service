@@ -47,9 +47,15 @@ public class UserRestcontroller {
         return userService.updatePassword(password, email);
     }
 
-    @GetMapping("/super-user/info")
+    @GetMapping("/super-admin/info")
     public ResponseEntity<Map<String, Object>> getVoterInfo(Authentication authentication) {
         String email = authentication.getName();
         return userService.getUserInfoByEmail(email);
+    }
+
+    @GetMapping("/super-admin/statistics")
+    public ResponseEntity<Map<String, Long>> getSystemStatistics() {
+        Map<String, Long> statistics = userService.getSystemStatistics();
+        return ResponseEntity.ok(statistics);
     }
 }

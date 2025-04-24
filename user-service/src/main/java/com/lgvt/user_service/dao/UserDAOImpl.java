@@ -71,4 +71,11 @@ public class UserDAOImpl implements UserDAO {
         // Save the updated voter entity
         entityManager.merge(user);
     }
+
+    @Override
+    public long getTotalUserCount() {
+        String query = "SELECT COUNT(u) FROM User u";
+        return entityManager.createQuery(query, Long.class).getSingleResult();
+    }
+
 }
