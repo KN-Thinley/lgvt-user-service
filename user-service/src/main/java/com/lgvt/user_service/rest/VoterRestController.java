@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgvt.user_service.Response.ForgotPasswordResponse;
+import com.lgvt.user_service.Response.LoginResponse;
+import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.Response.VerifyForgotPasswordResponse;
 import com.lgvt.user_service.dao.SecureTokenDAO;
 import com.lgvt.user_service.entity.SecureToken;
@@ -91,7 +93,7 @@ public class VoterRestController {
     }
 
     @PostMapping("/verify-login-otp")
-    public ResponseEntity<Map<String, Object>> verifyLoginOTP(@RequestParam("otp") int otp,
+    public ResponseEntity<LoginResponse> verifyLoginOTP(@RequestParam("otp") int otp,
             @RequestParam("token") String token,
             HttpServletResponse response) {
         try {
@@ -110,40 +112,53 @@ public class VoterRestController {
                 // Remove Token
                 secureTokenService.removeToken(sessionToken);
 
-                // Prepare response object
-                Map<String, Object> responseBody = new HashMap<>();
-                responseBody.put("message", "OTP verified successfully");
-                responseBody.put("token", sessionToken);
+                // // Prepare response object
+                // Map<String, Object> responseBody = new HashMap<>();
+                // responseBody.put("message", "OTP verified successfully");
+                // responseBody.put("token", sessionToken);
 
                 // Add user details in a nested object
-                Map<String, Object> user = new HashMap<>();
+                LoginUserInfo userInfo;
                 if (secureToken.getVoter() != null) {
-                    user.put("id", secureToken.getVoter().getId());
-                    user.put("email", secureToken.getVoter().getEmail());
-                    user.put("name", secureToken.getVoter().getName());
-                    user.put("role", secureToken.getVoter().getRole().toString());
+                    userInfo = new LoginUserInfo(
+                            secureToken.getVoter().getId(),
+                            secureToken.getVoter().getEmail(),
+                            secureToken.getVoter().getName(),
+                            secureToken.getVoter().getRole().toString());
                 } else {
-                    user.put("id", secureToken.getUser().getId());
-                    user.put("email", secureToken.getUser().getEmail());
-                    user.put("name", secureToken.getUser().getName());
-                    user.put("role", secureToken.getUser().getRole().toString());
+                    userInfo = new LoginUserInfo(
+                            secureToken.getUser().getId(),
+                            secureToken.getUser().getEmail(),
+                            secureToken.getUser().getName(),
+                            secureToken.getUser().getRole().toString());
                 }
-                responseBody.put("user", user);
+                // responseBody.put("user", user);
 
                 // Return response
-                return ResponseEntity.ok(responseBody);
+                // Return success response
+                return ResponseEntity.ok(new LoginResponse(
+                        "OTP verified successfully",
+                        sessionToken,
+                        true,
+                        "proceed",
+                        userInfo));
             } else {
-                // Prepare error response
-                // Prepare error response
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Invalid OTP");
-                return ResponseEntity.badRequest().body(errorResponse);
+                // Return error response for invalid OTP
+                return ResponseEntity.badRequest().body(new LoginResponse(
+                        "Invalid OTP",
+                        null,
+                        false,
+                        "retry",
+                        null));
             }
         } catch (RuntimeException e) {
-            // Prepare error response
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            // Return error response for exceptions
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(
+                    e.getMessage(),
+                    null,
+                    false,
+                    "error",
+                    null));
         }
     }
 
