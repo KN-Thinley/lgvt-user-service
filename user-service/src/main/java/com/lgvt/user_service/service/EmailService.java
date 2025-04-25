@@ -10,4 +10,6 @@ public interface EmailService {
     void sendMFAMail(final AbstractEmailContext email) throws MessagingException;
 
     void sendForgotPasswordMail(final AbstractEmailContext email) throws MessagingException;
+
+    void sendInvitationMail(final AbstractEmailContext email) throws MessagingException;
 }

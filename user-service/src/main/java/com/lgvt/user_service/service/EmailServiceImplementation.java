@@ -106,4 +106,30 @@ public class EmailServiceImplementation implements EmailService {
     System.out.println("Email sent successfully to: " + email.getTo());
   }
 
+  @Override
+  public void sendInvitationMail(final AbstractEmailContext email) throws MessagingException {
+    MimeMessage message = emailSender.createMimeMessage();
+    MimeMessageHelper messageHelper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+        StandardCharsets.UTF_8.name());
+
+    // Create the email content manually with a generic greeting
+    String emailContent = "<html><body>"
+        + "<h1>You're Invited!</h1>"
+        + "<p>Dear User,</p>" // Generic greeting
+        + "<p>You have been invited to join our platform. Please use the invitation code below to complete your registration:</p>"
+        + "<p style='font-size: 18px; font-weight: bold;'>Your invitation code: <b>" + email.getContext().get("token")
+        + "</b></p>"
+        + "<p>This code will expire on: <b>" + email.getContext().get("expiresAt") + "</b></p>"
+        + "<p>If you did not expect this invitation, please ignore this email.</p>"
+        + "<p>Thank you,</p>"
+        + "<p>The LGVT User Service Team</p>"
+        + "</body></html>";
+
+    messageHelper.setTo(email.getTo());
+    messageHelper.setFrom(email.getFrom());
+    messageHelper.setSubject(email.getSubject());
+    messageHelper.setText(emailContent, true);
+
+    emailSender.send(message);
+  }
 }
