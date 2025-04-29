@@ -10,6 +10,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -56,4 +58,14 @@ public class InvitationDAO {
             throw new RuntimeException("Failed to send invitation email. Please try again later.");
         }
     }
+
+    public Invitation findById(Long id) {
+        return entityManager.find(Invitation.class, id);
+    }
+
+    public List<Invitation> findAll() {
+        String query = "SELECT i FROM Invitation i";
+        return entityManager.createQuery(query, Invitation.class).getResultList();
+    }
+
 }

@@ -1,9 +1,18 @@
 package com.lgvt.user_service.service;
 
 import com.lgvt.user_service.dao.InvitationDAO;
+import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.entity.Invitation;
+import com.lgvt.user_service.entity.InvitationStatus;
+import com.lgvt.user_service.entity.User;
 
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +22,8 @@ public class InvitationServiceImpl implements InvitationService {
 
     @Autowired
     private InvitationDAO invitationDAO;
+    @Autowired
+    private UserDAO userDAO;
 
     private static final int CODE_LENGTH = 8;
 
@@ -41,6 +52,134 @@ public class InvitationServiceImpl implements InvitationService {
         invitationDAO.sendInvitationEmail(savedInvitation);
 
         return savedInvitation;
+    }
+
+    @Override
+    public Invitation resendInvitation(String email) {
+        // Find the existing invitation by email
+        Invitation existingInvitation = invitationDAO.findByEmail(email);
+        if (existingInvitation == null) {
+            throw new IllegalArgumentException("No invitation found for the provided email: " + email);
+        }
+
+        // Check if the token has expired
+        if (existingInvitation.getExpiresAt().isBefore(LocalDateTime.now())) {
+            // Generate a new token and update the expiration time
+            String newCode = generateInvitationCode();
+            existingInvitation.setCode(newCode);
+            existingInvitation.setExpiresAt(LocalDateTime.now().plusDays(1)); // Set new expiration time
+
+            // Save the updated invitation
+            invitationDAO.saveInvitation(existingInvitation);
+        }
+
+        // Resend the invitation email
+        invitationDAO.sendInvitationEmail(existingInvitation);
+
+        return existingInvitation;
+    }
+
+    @Override
+    public Long verifyInvitation(String email, String code) {
+        // Find the invitation by email
+        Invitation invitation = invitationDAO.findByEmail(email);
+        if (invitation == null) {
+            throw new IllegalArgumentException("No invitation found for the provided email: " + email);
+        }
+
+        // Check if the invitation is already accepted
+        if (invitation.getStatus() == InvitationStatus.ACCEPTED) {
+            throw new IllegalArgumentException("The invitation has already been accepted");
+        }
+
+        // Check if the invitation has expired
+        if (invitation.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("The invitation has expired");
+        }
+
+        // Check if the code matches
+        if (!invitation.getCode().equals(code)) {
+            throw new IllegalArgumentException("Invalid invitation code");
+        }
+
+        // Update the status to ACCEPTED and mark as used
+        invitation.setStatus(InvitationStatus.ACCEPTED);
+        invitation.setUsed(true);
+        invitationDAO.saveInvitation(invitation);
+
+        // Return the ID of the invitation
+        return invitation.getId();
+    }
+
+    @Override
+    public void registerAdmin(Long invitationId, User user) {
+        // Find the invitation by ID
+        Invitation invitation = invitationDAO.findById(invitationId);
+        if (invitation == null) {
+            throw new IllegalArgumentException("No invitation found for the provided ID: " + invitationId);
+        }
+
+        // Check if the invitation is already accepted
+        if (invitation.getStatus() != InvitationStatus.ACCEPTED) {
+            throw new IllegalArgumentException("The invitation must be accepted before registering the user");
+        }
+
+        // Check if the user already exists in the database
+        if (userDAO.userExistsByEmail(invitation.getEmail())) {
+            throw new IllegalArgumentException("A user with the provided email already exists");
+        }
+
+        // Set the email from the invitation to the user object
+        user.setEmail(invitation.getEmail());
+
+        // Register the user using the UserDAO
+        userDAO.saveUser(user);
+    }
+
+    @Override
+    public List<Map<String, Object>> getInvitationAndUserDetails() {
+        // Fetch all rows from the Invitation table
+        List<Invitation> invitations = invitationDAO.findAll();
+
+        // Prepare a list to hold the combined details
+        List<Map<String, Object>> detailsList = new ArrayList<>();
+
+        for (Invitation invitation : invitations) {
+            // Fetch the user details using the email from the Invitation table
+            User user = userDAO.findByEmail(invitation.getEmail());
+
+            // Combine the details into a map
+            Map<String, Object> details = new HashMap<>();
+            details.put("name", user != null ? user.getName() : "N/A");
+            details.put("email", invitation.getEmail());
+            details.put("last_login", user != null ? formatLastLogin(user.getLastLogin()) : "Never");
+            details.put("status", invitation.getStatus());
+
+            // Add the map to the list
+            detailsList.add(details);
+        }
+
+        return detailsList;
+    }
+
+    // Helper method to format the last login time
+    private String formatLastLogin(LocalDateTime lastLogin) {
+        if (lastLogin == null) {
+            return "Never";
+        }
+
+        Duration duration = Duration.between(lastLogin, LocalDateTime.now());
+        long seconds = duration.getSeconds();
+
+        if (seconds < 60) {
+            return seconds + " seconds ago";
+        } else if (seconds < 3600) {
+            return (seconds / 60) + " minutes ago";
+        } else if (seconds < 86400) {
+            return (seconds / 3600) + " hours ago";
+        } else {
+            return (seconds / 86400) + " days ago";
+        }
     }
 
     private String generateInvitationCode() {

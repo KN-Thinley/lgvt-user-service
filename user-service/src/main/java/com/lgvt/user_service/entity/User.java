@@ -46,18 +46,9 @@ public class User extends GeneralUser {
     @Column(name = "role", nullable = false)
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private InvitationStatus status = InvitationStatus.PENDING; // Default value set to PENDING
-
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now(); // Automatically set to the current time
+    private LocalDateTime createdAt = LocalDateTime.now(); 
 
-    // Setter for role to update status if role is SUPER_ADMIN
-    public void setRole(Role role) {
-        this.role = role;
-        if (role == Role.SUPER_ADMIN) {
-            this.status = InvitationStatus.ACCEPTED;
-        }
-    }
+    @Column(name = "last_login", nullable = true)
+    private LocalDateTime lastLogin;
 }

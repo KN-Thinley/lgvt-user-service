@@ -13,4 +13,7 @@ public interface UserDAO {
     void passwordReset(String password, User user);
 
     long getTotalUserCount();
+
+    // Admin view
+    User findByEmail(String email);
 }
