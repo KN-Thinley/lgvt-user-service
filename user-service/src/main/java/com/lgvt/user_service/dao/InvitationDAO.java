@@ -1,6 +1,7 @@
 package com.lgvt.user_service.dao;
 
 import com.lgvt.user_service.entity.Invitation;
+import com.lgvt.user_service.entity.InvitationStatus;
 import com.lgvt.user_service.service.EmailService;
 import com.lgvt.user_service.utils.InvitationEmailContext;
 
@@ -68,4 +69,10 @@ public class InvitationDAO {
         return entityManager.createQuery(query, Invitation.class).getResultList();
     }
 
+    public List<Invitation> findAllNonArchived() {
+        String query = "SELECT i FROM Invitation i WHERE i.status != :archivedStatus";
+        return entityManager.createQuery(query, Invitation.class)
+                .setParameter("archivedStatus", InvitationStatus.ARCHIVED)
+                .getResultList();
+    }
 }

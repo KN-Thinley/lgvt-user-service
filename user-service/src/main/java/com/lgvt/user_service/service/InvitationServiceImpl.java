@@ -5,6 +5,7 @@ import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.entity.Invitation;
 import com.lgvt.user_service.entity.InvitationStatus;
 import com.lgvt.user_service.entity.User;
+import com.lgvt.user_service.entity.UserStatus;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -29,21 +30,30 @@ public class InvitationServiceImpl implements InvitationService {
 
     @Override
     public Invitation saveInvitation(String email) {
-        // Check for duplicate invitation by email
+        // Check for an existing invitation
         Invitation existingInvitation = invitationDAO.findByEmail(email);
         if (existingInvitation != null) {
-            throw new IllegalArgumentException("An invitation already exists for the provided email: " + email);
+            if (existingInvitation.getStatus() == InvitationStatus.ARCHIVED) {
+                // Reuse the archived invitation
+                existingInvitation.setStatus(InvitationStatus.PENDING);
+                existingInvitation.setCode(generateInvitationCode());
+                existingInvitation.setExpiresAt(LocalDateTime.now().plusDays(1)); // Reset expiration time
+                Invitation updatedInvitation = invitationDAO.saveInvitation(existingInvitation);
+
+                // Send the invitation email
+                invitationDAO.sendInvitationEmail(updatedInvitation);
+
+                return updatedInvitation;
+            } else {
+                throw new IllegalArgumentException("An invitation already exists for the provided email: " + email);
+            }
         }
 
         // Create a new Invitation object
         Invitation invitation = new Invitation();
-
-        // Set the email
         invitation.setEmail(email);
-
-        // Generate an alphanumeric invitation code
-        String generatedCode = generateInvitationCode();
-        invitation.setCode(generatedCode);
+        invitation.setCode(generateInvitationCode());
+        invitation.setExpiresAt(LocalDateTime.now().plusDays(1)); // Set expiration time
 
         // Save the invitation using the DAO
         Invitation savedInvitation = invitationDAO.saveInvitation(invitation);
@@ -60,6 +70,11 @@ public class InvitationServiceImpl implements InvitationService {
         Invitation existingInvitation = invitationDAO.findByEmail(email);
         if (existingInvitation == null) {
             throw new IllegalArgumentException("No invitation found for the provided email: " + email);
+        }
+
+        // Check if the invitation is archived
+        if (existingInvitation.getStatus() == InvitationStatus.ARCHIVED) {
+            throw new IllegalArgumentException("Cannot resend an archived invitation");
         }
 
         // Check if the token has expired
@@ -125,21 +140,30 @@ public class InvitationServiceImpl implements InvitationService {
         }
 
         // Check if the user already exists in the database
-        if (userDAO.userExistsByEmail(invitation.getEmail())) {
-            throw new IllegalArgumentException("A user with the provided email already exists");
+        User existingUser = userDAO.findByEmail(invitation.getEmail());
+        if (existingUser != null) {
+            // If the user exists, update their credentials and enable them
+            existingUser.setName(user.getName());
+            existingUser.setPhone(user.getPhone());
+            existingUser.setDzongkhag(user.getDzongkhag());
+            existingUser.setGewog(user.getGewog());
+            existingUser.setPassword(user.getPassword());
+            existingUser.setStatus(UserStatus.ACTIVE); // Reactivate the user
+            userDAO.saveUser(existingUser);
+        } else {
+            // If the user does not exist, set the email from the invitation to the user
+            // object
+            user.setEmail(invitation.getEmail());
+
+            // Register the user using the UserDAO
+            userDAO.saveUser(user);
         }
-
-        // Set the email from the invitation to the user object
-        user.setEmail(invitation.getEmail());
-
-        // Register the user using the UserDAO
-        userDAO.saveUser(user);
     }
 
     @Override
     public List<Map<String, Object>> getInvitationAndUserDetails() {
-        // Fetch all rows from the Invitation table
-        List<Invitation> invitations = invitationDAO.findAll();
+        // Fetch all non-archived rows from the Invitation table
+        List<Invitation> invitations = invitationDAO.findAllNonArchived();
 
         // Prepare a list to hold the combined details
         List<Map<String, Object>> detailsList = new ArrayList<>();
@@ -162,7 +186,6 @@ public class InvitationServiceImpl implements InvitationService {
         return detailsList;
     }
 
-    // Helper method to format the last login time
     private String formatLastLogin(LocalDateTime lastLogin) {
         if (lastLogin == null) {
             return "Never";
@@ -193,5 +216,27 @@ public class InvitationServiceImpl implements InvitationService {
         }
 
         return codeBuilder.toString();
+    }
+
+    @Override
+    public void deleteUserOrInvitation(String email) {
+        // Check if the user exists in the User table
+        User user = userDAO.findByEmail(email);
+        if (user != null) {
+            // If the user exists, disable them
+            user.setStatus(UserStatus.DISABLED);
+            userDAO.saveUser(user);
+        }
+
+        // Check if the invitation exists and archive it
+        Invitation invitation = invitationDAO.findByEmail(email);
+        if (invitation != null) {
+            // Mark the invitation as ARCHIVED
+            invitation.setStatus(InvitationStatus.ARCHIVED);
+            invitationDAO.saveInvitation(invitation);
+        } else if (user == null) {
+            // If neither user nor invitation exists, throw an exception
+            throw new IllegalArgumentException("No user or invitation found for the provided email: " + email);
+        }
     }
 }

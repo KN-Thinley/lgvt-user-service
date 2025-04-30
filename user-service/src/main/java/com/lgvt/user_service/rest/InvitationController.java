@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -130,15 +131,18 @@ public class InvitationController {
         }
     }
 
-    // 2 => Add User and amdin*
+    @DeleteMapping("/super-admin/admin")
+    public ResponseEntity<String> deleteUserOrInvitation(@RequestParam String email) {
+        try {
+            invitationService.deleteUserOrInvitation(email);
+            return ResponseEntity.ok("User or invitation deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred while deleting the user or invitation");
+        }
+    }
 
-    // 3 => Delete User --- should it be diable or what --- directly delete the
-    // invitation if not accepted and even if accepted delete the invitation,but
-    // decide how to handle the deletion from the user table, think should not
-    // delete that part
-
-    // 5 => Add all under Super-admin authorty in spring security
-
-    // Others
-    // 1 => Login API of admin >>>> add the Last Login Field logic in the code
+    // 1 => Add all under Super-admin authorty in spring security
+    // 2 => Login API of admin >>>> add the Last Login Field logic in the code
 }

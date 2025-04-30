@@ -21,4 +21,6 @@ public interface InvitationService {
     void registerAdmin(Long invitationId, User user);
 
     List<Map<String, Object>> getInvitationAndUserDetails();
+
+    void deleteUserOrInvitation(String email);
 }

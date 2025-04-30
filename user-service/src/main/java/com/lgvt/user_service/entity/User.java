@@ -47,8 +47,12 @@ public class User extends GeneralUser {
     private Role role;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now(); 
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "last_login", nullable = true)
     private LocalDateTime lastLogin;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
 }
