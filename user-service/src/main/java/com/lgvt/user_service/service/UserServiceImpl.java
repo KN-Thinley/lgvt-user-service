@@ -1,5 +1,6 @@
 package com.lgvt.user_service.service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,6 +71,10 @@ public class UserServiceImpl implements UserService {
                     .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
             if (authentication.isAuthenticated()) {
+                // Update the last login time
+                existingUser.setLastLogin(LocalDateTime.now());
+                userDAO.saveUserWithoutPasswordEncryption(existingUser); // Save the updated user
+
                 String token = voterDAO.sendLoginMFAEmail(existingUser);
 
                 LoginUserInfo userInfo = new LoginUserInfo(
