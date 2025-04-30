@@ -31,11 +31,11 @@ public class UserDAOImpl implements UserDAO {
     public User getUserByEmail(String email) {
         try {
             TypedQuery<User> query = entityManager.createQuery(
-                    "SELECT v FROM User v WHERE v.email = :email", User.class);
-            query.setParameter("email", email);
+                    "SELECT u FROM User u WHERE LOWER(u.email) = :email", User.class);
+            query.setParameter("email", email.trim().toLowerCase());
             return query.getSingleResult();
         } catch (NoResultException e) {
-            return null; // Return null if no voter is found with the given emails
+            return null; // Return null if no user is found with the given email
         }
     }
 
@@ -43,6 +43,12 @@ public class UserDAOImpl implements UserDAO {
     @Transactional
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return entityManager.merge(user);
+    }
+
+    @Override
+    @Transactional
+    public User saveUserWithoutPasswordEncryption(User user) {
         return entityManager.merge(user);
     }
 

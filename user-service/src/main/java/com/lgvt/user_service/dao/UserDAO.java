@@ -8,6 +8,8 @@ public interface UserDAO {
 
     User saveUser(User user);
 
+    User saveUserWithoutPasswordEncryption(User user);
+
     boolean userExistsByEmail(String email);
 
     void passwordReset(String password, User user);

@@ -51,7 +51,7 @@ public class SecurityConfig {
                         "/api/super-admin/invitation/resent",
                         "/api/super-admin/invitation/register", "/api/super-admin/admins", "/api/super-admin/admin")
                 .hasAuthority("SUPER_ADMIN")
-                .requestMatchers("/api/auth/user/reset-password", "/api/auth/user/logout")
+                .requestMatchers("/api/auth/user/reset-password")
                 .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated());
         httpSecurity.httpBasic(Customizer.withDefaults());

@@ -35,11 +35,11 @@ public class UserRestcontroller {
         return userService.login(user, response);
     }
 
-    @PostMapping("/user/logout")
-    public ResponseEntity<String> logoutUser(Authentication authentication, HttpServletResponse response) {
-        String email = authentication.getName();
-        return userService.logout(email, response);
-    }
+    // @PostMapping("/user/logout")
+    // public ResponseEntity<String> logoutUser(Authentication authentication, HttpServletResponse response) {
+    //     String email = authentication.getName();
+    //     return userService.logout(email, response);
+    // }
 
     @PostMapping("/user/update-password")
     public ResponseEntity<String> updatePassword(@RequestParam String password, Authentication authentication) {

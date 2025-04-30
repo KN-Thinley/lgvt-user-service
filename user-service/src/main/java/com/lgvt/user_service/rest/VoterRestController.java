@@ -29,6 +29,7 @@ import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.security.CustomDetailsService;
 import com.lgvt.user_service.service.JwtService;
 import com.lgvt.user_service.service.SecureTokenService;
+import com.lgvt.user_service.service.UserService;
 import com.lgvt.user_service.service.VoterService;
 
 import jakarta.servlet.http.Cookie;
@@ -40,18 +41,24 @@ import org.springframework.http.MediaType;
 @RequestMapping("/api/auth")
 public class VoterRestController {
     private VoterService voterService;
+    private UserService userService;
     private SecureTokenService secureTokenService;
+
     @Autowired
     private JwtService jwtService;
+
     @Autowired
     private CustomDetailsService customUserDetailsService;
+
     @Autowired
     private SecureTokenDAO secureTokenDAO;
 
     @Autowired
-    public VoterRestController(VoterService voterService, SecureTokenService secureTokenService) {
+    public VoterRestController(VoterService voterService, SecureTokenService secureTokenService,
+            UserService userService) {
         this.secureTokenService = secureTokenService;
         this.voterService = voterService;
+        this.userService = userService;
     }
 
     // If user leaves half way
@@ -166,10 +173,27 @@ public class VoterRestController {
         }
     }
 
-    @PostMapping("/voter/logout")
+    @PostMapping("/logout")
     public ResponseEntity<String> logout(Authentication authentication, HttpServletResponse response) {
         String email = authentication.getName();
-        return voterService.logout(email, response);
+
+        // Check the roles or authorities of the authenticated user
+        boolean isVoter = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("VOTER"));
+        boolean isUser = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ADMIN")
+                        || authority.getAuthority().equals("SUPER_ADMIN"));
+
+        if (isVoter) {
+            // Handle logout for Voter
+            return voterService.logout(email, response);
+        } else if (isUser) {
+            // Handle logout for User
+            return userService.logout(email, response);
+        } else {
+            // If no matching role is found, return an error response
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized user type");
+        }
     }
 
     @PostMapping("/forgot-password")
