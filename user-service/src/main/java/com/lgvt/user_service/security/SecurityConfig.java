@@ -42,14 +42,14 @@ public class SecurityConfig {
                         "/api/auth/verify-login-otp", "/api/auth/voter/verify-otp", "/api/auth/forgot-password",
                         "/api/auth/verify-forgot-password-otp", "/api/auth/resent-otp",
                         "/api/auth/voter/login", "/api/auth/user/login", "/api/auth/reset-password",
-                        "/api/super-admin/invitation/verify")
+                        "/api/super-admin/invitation/verify",
+                        "/api/auth/super-user/register")
                 .permitAll()
                 .requestMatchers("/api/auth/voter/update-password").hasAuthority("VOTER")
                 .requestMatchers("/api/auth/super-admin/info",
                         "/api/auth/super-admin/statistics", "/api/super-admin/invitation",
                         "/api/super-admin/invitation/resent",
-                        "/api/super-admin/invitation/register", "/api/super-admin/admins", "/api/super-admin/admin",
-                        "/api/auth/super-user/register")
+                        "/api/super-admin/invitation/register", "/api/super-admin/admins", "/api/super-admin/admin")
                 .hasAuthority("SUPER_ADMIN")
                 .requestMatchers("/api/auth/user/reset-password", "/api/auth/user/logout")
                 .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
