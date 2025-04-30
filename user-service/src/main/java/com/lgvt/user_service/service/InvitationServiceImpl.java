@@ -77,6 +77,11 @@ public class InvitationServiceImpl implements InvitationService {
             throw new IllegalArgumentException("Cannot resend an archived invitation");
         }
 
+        // Check if the invitation is already accepted
+        if (existingInvitation.getStatus() == InvitationStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Cannot resend an already accepted invitation");
+        }
+
         // Check if the token has expired
         if (existingInvitation.getExpiresAt().isBefore(LocalDateTime.now())) {
             // Generate a new token and update the expiration time
@@ -142,6 +147,11 @@ public class InvitationServiceImpl implements InvitationService {
         // Check if the user already exists in the database
         User existingUser = userDAO.findByEmail(invitation.getEmail());
         if (existingUser != null) {
+            // If the user exists, check if their status is ACCEPTED
+            if (existingUser.getStatus() == UserStatus.ACTIVE) {
+                throw new IllegalArgumentException("Cannot update credentials for a user with Active status");
+            }
+
             // If the user exists, update their credentials and enable them
             existingUser.setName(user.getName());
             existingUser.setPhone(user.getPhone());
