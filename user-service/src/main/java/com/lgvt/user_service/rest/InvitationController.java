@@ -19,7 +19,7 @@ import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.service.InvitationService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class InvitationController {
     @Autowired
     private InvitationService invitationService;
