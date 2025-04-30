@@ -1,5 +1,6 @@
 package com.lgvt.user_service.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -22,4 +23,6 @@ public interface UserService {
     ResponseEntity<Map<String, Object>> getUserInfoByEmail(String email);
 
     Map<String, Long> getSystemStatistics();
+
+    List<Map<String, Object>> getAllVoters();
 }

@@ -1,5 +1,7 @@
 package com.lgvt.user_service.dao;
 
+import java.util.List;
+
 import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
@@ -32,4 +34,8 @@ public interface VoterDAO {
     long getTotalVoterCount();
 
     long getTotalVotersRegisteredToday();
+
+    public List<Voter> findAll();
+
+    List<Voter> findAllVerified();
 }

@@ -2,6 +2,7 @@ package com.lgvt.user_service.dao;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -271,5 +272,17 @@ public class VoterDAOImpl implements VoterDAO {
                 .setParameter("startOfDay", startOfDay)
                 .setParameter("endOfDay", endOfDay)
                 .getSingleResult();
+    }
+
+    @Override
+    public List<Voter> findAll() {
+        String query = "SELECT v FROM Voter v";
+        return entityManager.createQuery(query, Voter.class).getResultList();
+    }
+
+    @Override
+    public List<Voter> findAllVerified() {
+        String query = "SELECT v FROM Voter v WHERE v.is_verified = true";
+        return entityManager.createQuery(query, Voter.class).getResultList();
     }
 }

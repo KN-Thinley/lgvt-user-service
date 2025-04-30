@@ -1,5 +1,6 @@
 package com.lgvt.user_service.rest;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.entity.User;
+import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.service.UserService;
+import com.lgvt.user_service.service.VoterService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -23,6 +26,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class UserRestcontroller {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private VoterService voterService;
 
     @PostMapping("/super-user/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
@@ -36,9 +42,10 @@ public class UserRestcontroller {
     }
 
     // @PostMapping("/user/logout")
-    // public ResponseEntity<String> logoutUser(Authentication authentication, HttpServletResponse response) {
-    //     String email = authentication.getName();
-    //     return userService.logout(email, response);
+    // public ResponseEntity<String> logoutUser(Authentication authentication,
+    // HttpServletResponse response) {
+    // String email = authentication.getName();
+    // return userService.logout(email, response);
     // }
 
     @PostMapping("/user/update-password")
@@ -57,5 +64,11 @@ public class UserRestcontroller {
     public ResponseEntity<Map<String, Long>> getSystemStatistics() {
         Map<String, Long> statistics = userService.getSystemStatistics();
         return ResponseEntity.ok(statistics);
+    }
+
+    @GetMapping("/admin/voters")
+    public ResponseEntity<List<Map<String, Object>>> getAllVoters() {
+        List<Map<String, Object>> voters = userService.getAllVoters();
+        return ResponseEntity.ok(voters);
     }
 }

@@ -1,7 +1,11 @@
 package com.lgvt.user_service.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,5 +174,39 @@ public class UserServiceImpl implements UserService {
         statistics.put("totalUsers", totalUsers);
 
         return statistics;
+    }
+
+    @Override
+    public List<Map<String, Object>> getAllVoters() {
+        // Fetch all voters from the voter table
+        List<Voter> voters = voterDAO.findAll();
+
+        // Prepare a list to hold the voter details
+        List<Map<String, Object>> voterDetailsList = new ArrayList<>();
+
+        for (Voter voter : voters) {
+            // Combine dzongkhag and gewog into the "dzongkhag-gewog" format
+            String location = voter.getDzongkhag() + "-" + voter.getGewog();
+
+            // Create a map to hold the voter details
+            Map<String, Object> voterDetails = new HashMap<>();
+            voterDetails.put("id", voter.getId());
+            voterDetails.put("cid", voter.getCid());
+            voterDetails.put("name", voter.getName());
+            voterDetails.put("age", calculateAge(voter.getDob()));
+            voterDetails.put("location", location);
+
+            // Add the map to the list
+            voterDetailsList.add(voterDetails);
+        }
+
+        return voterDetailsList;
+    }
+
+    public int calculateAge(LocalDate dob) {
+        if (dob == null) {
+            return 0; // Return 0 if the date of birth is null
+        }
+        return Period.between(dob, LocalDate.now()).getYears();
     }
 }
