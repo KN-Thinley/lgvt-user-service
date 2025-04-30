@@ -34,6 +34,7 @@ import com.lgvt.user_service.service.VoterService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,9 +56,12 @@ public class VoterRestController {
 
     // If user leaves half way
     // If user token gets expired
-    @PostMapping("/voter/register")
-    public ResponseEntity<?> save(@Valid @RequestPart Voter voter, @RequestPart MultipartFile file) {
+    @PostMapping(value = "/voter/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> save(@RequestPart Voter voter, @RequestPart MultipartFile file) {
         // Save the voter
+
+        System.out.println("Voter: " + voter);
+        System.out.println("File: " + file.getOriginalFilename());
         String token = voterService.saveVoter(voter, file);
 
         // Response Body Preparation
