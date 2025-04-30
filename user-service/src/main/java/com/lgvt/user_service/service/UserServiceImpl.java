@@ -219,4 +219,18 @@ public class UserServiceImpl implements UserService {
         }
         return Period.between(dob, LocalDate.now()).getYears();
     }
+
+    @Override
+    @Transactional
+    public void deleteVoterById(int id) {
+        // Check if the voter exists
+        Voter voter = voterDAO.findById(id);
+        if (voter == null) {
+            throw new IllegalArgumentException("Voter not found with ID: " + id);
+        }
+
+        // Delete the voter
+        voterDAO.delete(voter);
+    }
+
 }

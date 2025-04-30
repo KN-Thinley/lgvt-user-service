@@ -25,4 +25,6 @@ public interface UserService {
     Map<String, Long> getSystemStatistics();
 
     List<Map<String, Object>> getAllVoters(String adminEmail);
+
+    void deleteVoterById(int id);
 }

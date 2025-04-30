@@ -304,4 +304,15 @@ public class VoterDAOImpl implements VoterDAO {
                 .setParameter("gewog", gewog)
                 .getResultList();
     }
+
+    @Override
+    public Voter findById(int id) {
+        return entityManager.find(Voter.class, id);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Voter voter) {
+        entityManager.remove(entityManager.contains(voter) ? voter : entityManager.merge(voter));
+    }
 }

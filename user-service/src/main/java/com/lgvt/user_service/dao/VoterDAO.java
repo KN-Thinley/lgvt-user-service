@@ -40,4 +40,8 @@ public interface VoterDAO {
     List<Voter> findAllVerified();
 
     List<Voter> findByDzongkhagAndGewog(String dzongkhag, String gewog);
+
+    void delete(Voter voter);
+
+    Voter findById(int id);
 }
