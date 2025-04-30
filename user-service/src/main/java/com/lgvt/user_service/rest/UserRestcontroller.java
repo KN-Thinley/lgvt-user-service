@@ -67,8 +67,13 @@ public class UserRestcontroller {
     }
 
     @GetMapping("/admin/voters")
-    public ResponseEntity<List<Map<String, Object>>> getAllVoters() {
-        List<Map<String, Object>> voters = userService.getAllVoters();
+    public ResponseEntity<List<Map<String, Object>>> getAllVoters(Authentication authentication) {
+        // Get the admin's email from the authentication object
+        String email = authentication.getName();
+
+        // Pass the admin's email to the service method
+        List<Map<String, Object>> voters = userService.getAllVoters(email);
+
         return ResponseEntity.ok(voters);
     }
 }

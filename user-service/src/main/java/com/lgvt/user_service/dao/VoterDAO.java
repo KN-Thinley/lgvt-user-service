@@ -38,4 +38,6 @@ public interface VoterDAO {
     public List<Voter> findAll();
 
     List<Voter> findAllVerified();
+
+    List<Voter> findByDzongkhagAndGewog(String dzongkhag, String gewog);
 }

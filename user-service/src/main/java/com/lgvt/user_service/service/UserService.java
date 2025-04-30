@@ -24,5 +24,5 @@ public interface UserService {
 
     Map<String, Long> getSystemStatistics();
 
-    List<Map<String, Object>> getAllVoters();
+    List<Map<String, Object>> getAllVoters(String adminEmail);
 }

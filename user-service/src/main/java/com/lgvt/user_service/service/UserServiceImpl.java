@@ -177,9 +177,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Map<String, Object>> getAllVoters() {
-        // Fetch all voters from the voter table
-        List<Voter> voters = voterDAO.findAll();
+    public List<Map<String, Object>> getAllVoters(String adminEmail) {
+        // Fetch the admin user by email
+        User admin = userDAO.getUserByEmail(adminEmail);
+        if (admin == null) {
+            throw new IllegalArgumentException("Admin not found with email: " + adminEmail);
+        }
+
+        // Get the dzongkhag and gewog of the admin
+        String adminDzongkhag = admin.getDzongkhag();
+        String adminGewog = admin.getGewog();
+
+        // Fetch voters based on the admin's dzongkhag and gewog
+        List<Voter> voters = voterDAO.findByDzongkhagAndGewog(adminDzongkhag, adminGewog);
 
         // Prepare a list to hold the voter details
         List<Map<String, Object>> voterDetailsList = new ArrayList<>();

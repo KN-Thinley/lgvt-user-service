@@ -285,4 +285,23 @@ public class VoterDAOImpl implements VoterDAO {
         String query = "SELECT v FROM Voter v WHERE v.is_verified = true";
         return entityManager.createQuery(query, Voter.class).getResultList();
     }
+
+    // @Override
+    // public List<Voter> findByDzongkhagAndGewog(String dzongkhag, String gewog) {
+    // String query = "SELECT v FROM Voter v WHERE v.dzongkhag = :dzongkhag AND
+    // v.gewog = :gewog AND v.verified = true";
+    // return entityManager.createQuery(query, Voter.class)
+    // .setParameter("dzongkhag", dzongkhag)
+    // .setParameter("gewog", gewog)
+    // .getResultList();
+    // }
+
+    @Override
+    public List<Voter> findByDzongkhagAndGewog(String dzongkhag, String gewog) {
+        String query = "SELECT v FROM Voter v WHERE v.dzongkhag = :dzongkhag AND v.gewog = :gewog AND v.verified = true";
+        return entityManager.createQuery(query, Voter.class)
+                .setParameter("dzongkhag", dzongkhag)
+                .setParameter("gewog", gewog)
+                .getResultList();
+    }
 }
