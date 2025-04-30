@@ -88,6 +88,14 @@ public class VoterServiceImpl implements VoterService {
             if (authentication.isAuthenticated()) {
                 // Check if the user is verified
                 if (existingVoter.isVerified()) {
+                    // Create UserInfo object
+
+                    LoginUserInfo userInfo = new LoginUserInfo(
+                            existingVoter.getId(),
+                            existingVoter.getEmail(),
+                            existingVoter.getName(),
+                            existingVoter.getRole().toString());
+
                     // Check if the user has done MFA
                     if (existingVoter.isLogged_in()) {
 
@@ -99,13 +107,6 @@ public class VoterServiceImpl implements VoterService {
                         jwtCookie.setHttpOnly(true);
                         response.addCookie(jwtCookie);
 
-                        // Create UserInfo object
-                        LoginUserInfo userInfo = new LoginUserInfo(
-                                existingVoter.getId(),
-                                existingVoter.getEmail(),
-                                existingVoter.getName(),
-                                existingVoter.getRole().toString());
-
                         return ResponseEntity.ok(new LoginResponse(
                                 "Login successful",
                                 token,
@@ -115,12 +116,13 @@ public class VoterServiceImpl implements VoterService {
                     } else {
                         // Redirect to MFA page
                         String token = voterDAO.sendLoginMFAEmail(existingVoter);
+
                         // Generate and send a email
                         return ResponseEntity.ok(new LoginResponse(
                                 "Multifactor Authentication needed",
                                 token,
                                 false,
-                                "redirect_to_mfa", null));
+                                "redirect_to_mfa", userInfo));
                     }
                 } else {
                     // User is not verified

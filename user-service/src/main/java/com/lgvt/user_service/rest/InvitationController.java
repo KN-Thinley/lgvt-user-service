@@ -142,7 +142,4 @@ public class InvitationController {
             return ResponseEntity.status(500).body("An error occurred while deleting the user or invitation");
         }
     }
-
-    // 1 => Add all under Super-admin authorty in spring security
-    // 2 => Login API of admin >>>> add the Last Login Field logic in the code
 }

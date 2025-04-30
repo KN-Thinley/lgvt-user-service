@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.lgvt.user_service.Response.LoginResponse;
+import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.User;
@@ -71,13 +72,19 @@ public class UserServiceImpl implements UserService {
             if (authentication.isAuthenticated()) {
                 String token = voterDAO.sendLoginMFAEmail(existingUser);
 
+                LoginUserInfo userInfo = new LoginUserInfo(
+                        existingUser.getId(),
+                        existingUser.getEmail(),
+                        existingUser.getName(),
+                        existingUser.getRole().toString());
+
                 // Return success response
                 return ResponseEntity.ok(new LoginResponse(
                         "Successful Send A MFA Email",
                         token,
                         false,
                         "redirect_to_mfa",
-                        null));
+                        userInfo));
             } else {
                 // Password is incorrect
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
