@@ -25,21 +25,21 @@ public class InvitationController {
     private InvitationService invitationService;
 
     @PostMapping("/super-admin/invitation")
-    public ResponseEntity<String> createInvitation(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> createInvitation(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
 
         if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().body("Email is required");
+            return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
         }
 
         // Save the invitation
         invitationService.saveInvitation(email);
 
-        return ResponseEntity.ok("Successfully invited the user");
+        return ResponseEntity.ok(Map.of("message", "Invitation sent successfully"));
     }
 
     @PostMapping("/super-admin/invitation/resent")
-    public ResponseEntity<String> resendInvitation(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<Object> resendInvitation(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
 
         if (email == null || email.isBlank()) {
@@ -49,11 +49,12 @@ public class InvitationController {
         try {
             // Save and send the invitation
             invitationService.resendInvitation(email);
-            return ResponseEntity.ok("Invitation resent successfully");
+            return ResponseEntity.ok(Map.of("message", "Invitation resent successfully"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred while resending the invitation");
+            return ResponseEntity.status(500)
+                    .body(Map.of("message", "An error occurred while resending the invitation"));
         }
     }
 
@@ -97,7 +98,7 @@ public class InvitationController {
                 gewog == null || gewog.isBlank() ||
                 password == null || password.isBlank()) {
             return ResponseEntity.badRequest()
-                    .body("All fields (name, phone, dzongkhag, gewog, password) are required");
+                    .body(Map.of("message", "All fields are required"));
         }
 
         try {
@@ -113,11 +114,11 @@ public class InvitationController {
             // Call the service method to register the admin
             invitationService.registerAdmin(invitationId, user);
 
-            return ResponseEntity.ok("Admin registered successfully");
+            return ResponseEntity.ok(Map.of("message", "Admin registered successfully"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred while registering the admin");
+            return ResponseEntity.status(500).body(Map.of("message", "An error occurred while registering the admin"));
         }
     }
 
@@ -132,14 +133,15 @@ public class InvitationController {
     }
 
     @DeleteMapping("/super-admin/admin")
-    public ResponseEntity<String> deleteUserOrInvitation(@RequestParam String email) {
+    public ResponseEntity<Object> deleteUserOrInvitation(@RequestParam String email) {
         try {
             invitationService.deleteUserOrInvitation(email);
-            return ResponseEntity.ok("User or invitation deleted successfully");
+            return ResponseEntity.ok(Map.of("message", "User or invitation deleted successfully"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred while deleting the user or invitation");
+            return ResponseEntity.status(500)
+                    .body(Map.of("message", "An error occurred while deleting the user or invitation"));
         }
     }
 }
