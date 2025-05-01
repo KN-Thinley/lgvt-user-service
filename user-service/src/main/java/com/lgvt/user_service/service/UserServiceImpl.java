@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.Response.LoginUserInfo;
+import com.lgvt.user_service.dao.SecureTokenDAO;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
 import com.lgvt.user_service.entity.User;
@@ -37,6 +38,8 @@ public class UserServiceImpl implements UserService {
     private UserDAO userDAO;
     @Autowired
     private VoterDAO voterDAO;
+    @Autowired
+    private SecureTokenDAO secureTokenDAO;
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -229,8 +232,49 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Voter not found with ID: " + id);
         }
 
+        // Delete all tokens related to the voter
+        // secureTokenDAO.deleteByVoterId(id);
+
         // Delete the voter
         voterDAO.delete(voter);
     }
 
+    @Override
+    public ResponseEntity<Map<String, Object>> getAdminInfo(String adminEmail) {
+        // Fetch the admin user by email
+        User admin = userDAO.getUserByEmail(adminEmail);
+
+        if (admin == null) {
+            // Return 404 if admin not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Admin not found with email: " + adminEmail));
+        }
+
+        // Prepare selective fields to return
+        Map<String, Object> adminInfo = new HashMap<>();
+        adminInfo.put("name", admin.getName());
+        adminInfo.put("email", admin.getEmail());
+        adminInfo.put("number", admin.getPhone());
+        adminInfo.put("dzongkhag", admin.getDzongkhag());
+        adminInfo.put("gewog", admin.getGewog());
+
+        // Return the response
+        return ResponseEntity.ok(adminInfo);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Long>> getVoterStatistics() {
+        // Fetch the total number of voters
+        long totalVoters = voterDAO.getTotalVoterCount();
+
+        // Fetch the number of voters who registered today
+        long votersRegisteredToday = voterDAO.getTotalVotersRegisteredToday();
+
+        // Prepare the response
+        Map<String, Long> statistics = new HashMap<>();
+        statistics.put("totalVoters", totalVoters);
+        statistics.put("votersRegisteredToday", votersRegisteredToday);
+
+        return ResponseEntity.ok(statistics);
+    }
 }

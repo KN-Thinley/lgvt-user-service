@@ -93,4 +93,18 @@ public class UserRestcontroller {
                     .body("An error occurred while deleting the voter");
         }
     }
+
+    @GetMapping("/admin/info")
+    public ResponseEntity<Map<String, Object>> getAdminInfo(Authentication authentication) {
+        // Get the admin's email from the authentication object
+        String adminEmail = authentication.getName();
+
+        // Call the service method to fetch admin info
+        return userService.getAdminInfo(adminEmail);
+    }
+
+    @GetMapping("/admin/statistics")
+    public ResponseEntity<Map<String, Long>> getVoterStatistics() {
+        return userService.getVoterStatistics();
+    }
 }

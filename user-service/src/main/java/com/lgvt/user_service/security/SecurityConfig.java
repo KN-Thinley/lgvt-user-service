@@ -47,7 +47,8 @@ public class SecurityConfig {
                 .permitAll()
                 .requestMatchers("/api/auth/voter/update-password").hasAuthority("VOTER")
                 .requestMatchers(
-                        "/api/auth/super-user/register", "/api/auth/admin/voters","/api/auth/admin/voter")
+                        "/api/auth/super-user/register", "/api/auth/admin/voters", "/api/auth/admin/voter",
+                        "/api/auth/admin/info", "/api/auth/admin/statistics")
                 .hasAuthority("ADMIN")
                 .requestMatchers("/api/auth/super-admin/info",
                         "/api/auth/super-admin/statistics", "/api/auth/super-admin/invitation",

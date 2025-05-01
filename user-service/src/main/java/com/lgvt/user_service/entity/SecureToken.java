@@ -29,11 +29,11 @@ public class SecureToken {
     @Basic(optional = false)
     private LocalDateTime expireAt;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "voter_id", referencedColumnName = "id")
     private Voter voter;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 

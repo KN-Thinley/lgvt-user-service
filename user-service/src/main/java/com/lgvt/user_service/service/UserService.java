@@ -27,4 +27,8 @@ public interface UserService {
     List<Map<String, Object>> getAllVoters(String adminEmail);
 
     void deleteVoterById(int id);
+
+    ResponseEntity<Map<String, Object>> getAdminInfo(String adminEmail);
+
+    ResponseEntity<Map<String, Long>> getVoterStatistics();
 }

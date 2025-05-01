@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import com.lgvt.user_service.entity.Role;
 import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.service.EmailService;
@@ -80,8 +81,10 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public long getTotalUserCount() {
-        String query = "SELECT COUNT(u) FROM User u";
-        return entityManager.createQuery(query, Long.class).getSingleResult();
+        String query = "SELECT COUNT(u) FROM User u WHERE u.role = :role";
+        return entityManager.createQuery(query, Long.class)
+                .setParameter("role", Role.ADMIN)
+                .getSingleResult();
     }
 
     public User findByEmail(String email) {
