@@ -81,20 +81,19 @@ public class VoterRestController {
     }
 
     @PostMapping("/voter/verify-otp")
-    public ResponseEntity<String> verifyOTP(@RequestParam("otp") int otp, @RequestParam("token") String token) {
+    public ResponseEntity<Map<String, String>> verifyOTP(@RequestParam("otp") int otp,
+            @RequestParam("token") String token) {
         try {
             boolean isVerified = secureTokenService.verifyOtp(otp, token);
             if (isVerified) {
                 secureTokenService.changeVoterStatus(token);
-                System.out.println("Voter status changed successfully");
                 secureTokenService.removeToken(token);
-                System.out.println("Token removed successfully");
-                return ResponseEntity.ok("OTP is verified");
+                return ResponseEntity.ok(Map.of("message", "OTP is verified"));
             } else {
-                return ResponseEntity.badRequest().body("Invalid OTP");
+                return ResponseEntity.badRequest().body(Map.of("message", "Invalid OTP"));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
     }
 

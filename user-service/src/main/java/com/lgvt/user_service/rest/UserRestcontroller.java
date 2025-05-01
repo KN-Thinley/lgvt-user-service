@@ -36,9 +36,8 @@ public class UserRestcontroller {
     @PostMapping("/super-user/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         return userService.saveUser(user);
-
     }
-
+ 
     @PostMapping("/user/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody User user, HttpServletResponse response) {
         return userService.login(user, response);
