@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private VoterDAO voterDAO;
     @Autowired
-    private SecureTokenDAO secureTokenDAO;
+    private SecureTokenService secureTokenService;
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
@@ -233,7 +233,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Delete all tokens related to the voter
-        // secureTokenDAO.deleteByVoterId(id);
+        secureTokenService.deleteTokensByVoterId(id);
 
         // Delete the voter
         voterDAO.delete(voter);

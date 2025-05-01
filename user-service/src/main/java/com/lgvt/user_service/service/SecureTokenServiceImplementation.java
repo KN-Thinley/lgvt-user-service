@@ -145,4 +145,11 @@ public class SecureTokenServiceImplementation implements SecureTokenService {
             throw new RuntimeException("No associated user found for the token.");
         }
     }
+
+    @Override
+    @Transactional
+    public void deleteTokensByVoterId(int voterId) {
+        // Use a custom query to delete tokens by voter ID
+        secureTokenDAO.deleteTokensByVoterId(voterId);
+    }
 }

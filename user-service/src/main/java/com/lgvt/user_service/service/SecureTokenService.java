@@ -20,4 +20,6 @@ public interface SecureTokenService {
     void changeVoterLoginStatus(String token);
 
     String getEmailFromToken(String token);
+
+    void deleteTokensByVoterId(int voterId);
 }

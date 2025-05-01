@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .hasAuthority("SUPER_ADMIN")
                 .requestMatchers("/api/auth/user/reset-password")
                 .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
-                .anyRequest().authenticated());
+                .anyRequest().authenticated()); 
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
