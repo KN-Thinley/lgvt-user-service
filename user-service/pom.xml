@@ -171,11 +171,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<!-- Eureka client -->
-		<!-- <dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 			<version>4.1.5</version>
-		</dependency> -->
+		</dependency>
 	</dependencies>
 
 	<build>
