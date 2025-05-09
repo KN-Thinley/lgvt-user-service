@@ -94,4 +94,9 @@ public class UserDAOImpl implements UserDAO {
         return typedQuery.getResultStream().findFirst().orElse(null);
     }
 
+    @Override
+    @Transactional
+    public User save(User user) {
+        return entityManager.merge(user);
+    }
 }

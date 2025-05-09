@@ -18,4 +18,6 @@ public interface UserDAO {
 
     // Admin view
     User findByEmail(String email);
+
+    User save(User user);
 }

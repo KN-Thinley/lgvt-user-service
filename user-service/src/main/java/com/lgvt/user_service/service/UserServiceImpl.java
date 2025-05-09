@@ -278,4 +278,25 @@ public class UserServiceImpl implements UserService {
 
         return ResponseEntity.ok(statistics);
     }
+
+    @Override
+    @Transactional
+    public void updateAdminInfoByEmail(String email, Map<String, String> updates) {
+        // Fetch the admin by email
+        User admin = userDAO.findByEmail(email);
+        if (admin == null) {
+            throw new IllegalArgumentException("Admin not found with email: " + email);
+        }
+
+        // Update the admin's dzongkhag and gewog
+        if (updates.containsKey("dzongkhag")) {
+            admin.setDzongkhag(updates.get("dzongkhag"));
+        }
+        if (updates.containsKey("gewog")) {
+            admin.setGewog(updates.get("gewog"));
+        }
+
+        // Save the updated admin
+        userDAO.save(admin);
+    }
 }

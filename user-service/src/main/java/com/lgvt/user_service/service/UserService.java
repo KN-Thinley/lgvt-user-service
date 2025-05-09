@@ -31,4 +31,6 @@ public interface UserService {
     ResponseEntity<Map<String, Object>> getAdminInfo(String adminEmail);
 
     ResponseEntity<Map<String, Long>> getVoterStatistics();
+
+    void updateAdminInfoByEmail(String email, Map<String, String> updates);
 }

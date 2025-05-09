@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,7 +38,7 @@ public class UserRestcontroller {
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         return userService.saveUser(user);
     }
- 
+
     @PostMapping("/user/login")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody User user, HttpServletResponse response) {
         return userService.login(user, response);
@@ -105,5 +106,25 @@ public class UserRestcontroller {
     @GetMapping("/admin/statistics")
     public ResponseEntity<Map<String, Long>> getVoterStatistics() {
         return userService.getVoterStatistics();
+    }
+
+    @PutMapping("/admin/update-info")
+    public ResponseEntity<Map<String, String>> updateAdminInfo(
+            @RequestBody Map<String, String> updates,
+            Authentication authentication) {
+
+        // Extract the email from the authentication object
+        String email = authentication.getName();
+
+        try {
+            // Call the service to update admin information
+            userService.updateAdminInfoByEmail(email, updates);
+            return ResponseEntity.ok(Map.of("message", "Admin information updated successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "An error occurred while updating admin information"));
+        }
     }
 }
