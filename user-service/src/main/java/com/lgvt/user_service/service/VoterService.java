@@ -29,4 +29,6 @@ public interface VoterService {
     public ResponseEntity<String> updatePassword(String password, String email);
 
     String createSession(String email, HttpServletResponse response);
+
+    void updateVoterInfoByEmail(String email, Map<String, String> updates);
 }

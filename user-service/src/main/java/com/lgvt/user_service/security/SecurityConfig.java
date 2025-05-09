@@ -45,7 +45,7 @@ public class SecurityConfig {
                         "/api/auth/super-admin/invitation/verify",
                         "/api/auth/super-user/register", "/api/auth/super-admin/invitation/register")
                 .permitAll()
-                .requestMatchers("/api/auth/voter/update-password").hasAuthority("VOTER")
+                .requestMatchers("/api/auth/voter/update-password", "api/auth/voter/update-info").hasAuthority("VOTER")
                 .requestMatchers(
                         "/api/auth/super-user/register", "/api/auth/admin/voters", "/api/auth/admin/voter",
                         "/api/auth/admin/info", "/api/auth/admin/statistics")
@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .hasAuthority("SUPER_ADMIN")
                 .requestMatchers("/api/auth/user/reset-password")
                 .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
-                .anyRequest().authenticated()); 
+                .anyRequest().authenticated());
         httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.sessionManagement(session -> session
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));

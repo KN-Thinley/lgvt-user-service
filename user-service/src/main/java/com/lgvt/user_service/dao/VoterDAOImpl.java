@@ -23,6 +23,7 @@ import com.lgvt.user_service.utils.MFAEmailContext;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
@@ -314,5 +315,19 @@ public class VoterDAOImpl implements VoterDAO {
     @Transactional
     public void delete(Voter voter) {
         entityManager.remove(entityManager.contains(voter) ? voter : entityManager.merge(voter));
+    }
+
+    @Override
+    public Voter findByEmail(String email) {
+        String query = "SELECT v FROM Voter v WHERE v.email = :email";
+        return entityManager.createQuery(query, Voter.class)
+                .setParameter("email", email)
+                .getSingleResult();
+    }
+
+    @Override
+    @Transactional
+    public Voter save(Voter voter) {
+        return entityManager.merge(voter);
     }
 }

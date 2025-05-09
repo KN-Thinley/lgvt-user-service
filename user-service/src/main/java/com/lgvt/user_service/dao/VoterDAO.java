@@ -44,4 +44,7 @@ public interface VoterDAO {
     void delete(Voter voter);
 
     Voter findById(int id);
+
+    Voter findByEmail(String email);
+    Voter save(Voter voter);
 }

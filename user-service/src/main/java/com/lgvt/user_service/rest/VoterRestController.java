@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -247,4 +248,24 @@ public class VoterRestController {
         String email = authentication.getName();
         return voterService.updatePassword(password, email);
     }
+
+    @PutMapping("/voter/update-info")
+    public ResponseEntity<Map<String, String>> updateVoterInfo(
+            @RequestBody Map<String, String> updates,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        try {
+            // Call the service to update voter information
+            voterService.updateVoterInfoByEmail(email, updates);
+            return ResponseEntity.ok(Map.of("message", "Voter information updated successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "An error occurred while updating voter information"));
+        }
+    }
+
 }

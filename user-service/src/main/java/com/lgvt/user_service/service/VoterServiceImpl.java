@@ -315,4 +315,31 @@ public class VoterServiceImpl implements VoterService {
 
         return token;
     }
+
+    @Override
+    @Transactional
+    public void updateVoterInfoByEmail(String email, Map<String, String> updates) {
+        // Fetch the voter by email
+        Voter voter = voterDAO.findByEmail(email);
+        if (voter == null) {
+            throw new IllegalArgumentException("Voter not found with email: " + email);
+        }
+
+        // Update the voter's information
+        if (updates.containsKey("dzongkhag")) {
+            voter.setDzongkhag(updates.get("dzongkhag"));
+        }
+        if (updates.containsKey("gewog")) {
+            voter.setGewog(updates.get("gewog"));
+        }
+        if (updates.containsKey("village")) {
+            voter.setVillage(updates.get("village"));
+        }
+        if (updates.containsKey("occupation")) {
+            voter.setOccupation(updates.get("occupation"));
+        }
+
+        // Save the updated voter
+        voterDAO.save(voter);
+    }
 }
