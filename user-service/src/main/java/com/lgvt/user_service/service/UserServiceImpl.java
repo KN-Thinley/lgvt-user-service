@@ -208,6 +208,7 @@ public class UserServiceImpl implements UserService {
             voterDetails.put("name", voter.getName());
             voterDetails.put("age", calculateAge(voter.getDob()));
             voterDetails.put("location", location);
+            voterDetails.put("email", voter.getEmail());
 
             // Add the map to the list
             voterDetailsList.add(voterDetails);
