@@ -282,6 +282,7 @@ public class VoterServiceImpl implements VoterService {
         voterInfo.put("phone", voter.getPhone());
         voterInfo.put("dzongkhag", voter.getDzongkhag());
         voterInfo.put("gewog", voter.getGewog());
+        voterInfo.put("village", voter.getVillage());
         voterInfo.put("occupation", voter.getOccupation());
 
         // Return the response
