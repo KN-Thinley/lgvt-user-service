@@ -4,6 +4,7 @@ import com.lgvt.user_service.dao.InvitationDAO;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.entity.Invitation;
 import com.lgvt.user_service.entity.InvitationStatus;
+import com.lgvt.user_service.entity.Role;
 import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.UserStatus;
 
@@ -182,15 +183,18 @@ public class InvitationServiceImpl implements InvitationService {
             // Fetch the user details using the email from the Invitation table
             User user = userDAO.findByEmail(invitation.getEmail());
 
-            // Combine the details into a map
-            Map<String, Object> details = new HashMap<>();
-            details.put("name", user != null ? user.getName() : "N/A");
-            details.put("email", invitation.getEmail());
-            details.put("last_login", user != null ? formatLastLogin(user.getLastLogin()) : "Never");
-            details.put("status", invitation.getStatus());
+            // Only add if user exists and has ADMIN role
+            if (user != null && user.getRole() == Role.ADMIN) {
+                // Combine the details into a map
+                Map<String, Object> details = new HashMap<>();
+                details.put("name", user.getName());
+                details.put("email", invitation.getEmail());
+                details.put("last_login", formatLastLogin(user.getLastLogin()));
+                details.put("status", invitation.getStatus());
 
-            // Add the map to the list
-            detailsList.add(details);
+                // Add the map to the list
+                detailsList.add(details);
+            }
         }
 
         return detailsList;
