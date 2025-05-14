@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 public class HelloController {
     @GetMapping("/hello")
-    public String hello(HttpServletRequest request) {
-        return "Hello, World!" + request.getSession().getId();
+    public String hello() {
+        return "Hello, World! From user services.";
     }
 
     @GetMapping("/csrf-token")
