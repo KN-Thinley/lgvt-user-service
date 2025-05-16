@@ -28,6 +28,8 @@ public interface UserService {
 
     void deleteVoterById(int id);
 
+    boolean checkIfUserExistsById(int id);
+
     ResponseEntity<Map<String, Object>> getAdminInfo(String adminEmail);
 
     ResponseEntity<Map<String, Long>> getVoterStatistics();

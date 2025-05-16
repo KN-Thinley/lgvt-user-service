@@ -8,6 +8,8 @@ public interface UserDAO {
 
     User saveUser(User user);
 
+    boolean userExistsById(int id);
+
     User saveUserWithoutPasswordEncryption(User user);
 
     boolean userExistsByEmail(String email);

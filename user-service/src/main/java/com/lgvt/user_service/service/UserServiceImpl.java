@@ -68,6 +68,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean checkIfUserExistsById(int id) {
+        // Check if the user exists by ID
+        return userDAO.userExistsById(id);
+    }
+
+    @Override
     public ResponseEntity<LoginResponse> login(User user, HttpServletResponse response) {
         // Fetch the user by email
         User existingUser = userDAO.getUserByEmail(user.getEmail());

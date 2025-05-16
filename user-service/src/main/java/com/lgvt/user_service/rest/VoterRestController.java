@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -79,6 +80,12 @@ public class VoterRestController {
 
         // Send the OTP to the email
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/exists")
+    public ResponseEntity<Boolean> checkIfUserExists(@PathVariable int id) {
+        boolean exists = voterService.checkIfUserExistsById(id);
+        return ResponseEntity.ok(exists);
     }
 
     @PostMapping("/voter/verify-otp")

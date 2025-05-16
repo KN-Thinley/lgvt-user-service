@@ -70,6 +70,10 @@ public class VoterServiceImpl implements VoterService {
         }
     }
 
+    public boolean checkIfUserExistsById(int id) {
+        return voterDAO.checkIfUserExistsById(id);
+    }
+
     public CidDocument uploadImage(final Integer id, final MultipartFile imageFile) {
         FileUploadUtil.assertAllowed(imageFile, FileUploadUtil.IMAGE_PATTERN);
         final String fileName = FileUploadUtil.getFileName(imageFile.getOriginalFilename());
