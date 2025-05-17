@@ -1,10 +1,14 @@
 package com.lgvt.user_service.security;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -42,25 +46,42 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Fetching the user details from the database
-            UserDetails userDetails = context.getBean(CustomDetailsService.class).loadUserByUsername(userName);
+            // UserDetails userDetails =
+            // context.getBean(CustomDetailsService.class).loadUserByUsername(userName);
 
-            if (jwtService.validateToken(token, userDetails)) {
-                // Creating token to pass to the UserNamePasswordAuthenticationFilter
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                        null,
-                        userDetails.getAuthorities());
+            // if (jwtService.validateToken(token, userDetails)) {
+            // // Creating token to pass to the UserNamePasswordAuthenticationFilter
+            // UsernamePasswordAuthenticationToken authToken = new
+            // UsernamePasswordAuthenticationToken(userDetails,
+            // null,
+            // userDetails.getAuthorities());
 
-                System.out.println("TALOP User Details: " + userDetails.getUsername() + " " + userDetails.getAuthorities());
+            // System.out.println("TALOP User Details: " + userDetails.getUsername() + " " +
+            // userDetails.getAuthorities());
 
-                // Adding the request details in the auth token
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            // // Adding the request details in the auth token
+            // authToken.setDetails(new
+            // WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Setting the token in the security context
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+            // // Setting the token in the security context
+            // SecurityContextHolder.getContext().setAuthentication(authToken);
+            // }
 
+            // New Logic
+            // Extract roles from JWT claims
+            List<String> roles = jwtService.extractRoles(token);
+            List<GrantedAuthority> authorities = roles.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+
+            // Build UserDetails or just use the username and authorities
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    userName, null, authorities);
+
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
-        
+
         filterChain.doFilter(request, response);
     }
 
