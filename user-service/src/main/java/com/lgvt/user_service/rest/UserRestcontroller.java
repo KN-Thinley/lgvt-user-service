@@ -63,6 +63,12 @@ public class UserRestcontroller {
         return userService.getUserInfoByEmail(email);
     }
 
+    @PostMapping("/{id}/userexists")
+    public ResponseEntity<Boolean> checkIfUserExists(@PathVariable int id) {
+        boolean exists = userService.checkIfUserExistsById(id);
+        return ResponseEntity.ok(exists);
+    }
+
     @GetMapping("/super-admin/statistics")
     public ResponseEntity<Map<String, Long>> getSystemStatistics() {
         Map<String, Long> statistics = userService.getSystemStatistics();

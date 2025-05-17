@@ -67,6 +67,19 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
+    public boolean userExistsById(int id) {
+        try {
+            TypedQuery<Long> query = entityManager.createQuery(
+                    "SELECT COUNT(u) FROM User u WHERE u.id = :id", Long.class);
+            query.setParameter("id", id);
+            Long count = query.getSingleResult();
+            return count > 0;
+        } catch (Exception e) {
+            return false; // Return false in case of any unexpected exception
+        }
+    }
+
+    @Override
     @Transactional
     public void passwordReset(String password, User user) {
         // Encrypt the new password

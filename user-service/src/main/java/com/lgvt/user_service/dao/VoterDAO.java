@@ -11,6 +11,8 @@ public interface VoterDAO {
 
     boolean checkIfUserExists(String email);
 
+    boolean checkIfUserExistsById(int id);
+
     String sendRegistrationConfirmationEmail(Voter voter);
 
     String sendLoginMFAEmail(GeneralUser user);

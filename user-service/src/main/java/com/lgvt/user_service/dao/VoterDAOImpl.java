@@ -67,6 +67,19 @@ public class VoterDAOImpl implements VoterDAO {
     }
 
     @Override
+    public boolean checkIfUserExistsById(int id){
+        try {
+            TypedQuery<Voter> query = entityManager.createQuery("SELECT u FROM Voter u WHERE u.id = :id",
+                    Voter.class);
+            query.setParameter("id", id);
+            query.getSingleResult();
+            return true;
+        } catch (NoResultException e) {
+            return false;
+        }
+    }
+
+    @Override
     public String sendRegistrationConfirmationEmail(Voter voter) {
         // Create a secure token
         SecureToken secureToken = secureTokenService.createToken(voter);

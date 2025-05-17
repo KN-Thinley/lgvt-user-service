@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface VoterService {
     String saveVoter(Voter voter, MultipartFile imageFile);
 
+    boolean checkIfUserExistsById(int id);
+
     ResponseEntity<LoginResponse> loginVoter(Voter voter, HttpServletResponse response);
 
     ResponseEntity<String> logout(String email, HttpServletResponse response);
