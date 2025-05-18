@@ -82,7 +82,7 @@ public class VoterRestController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/{id}/exists")
+    @GetMapping("/exists/{id}")
     public ResponseEntity<Boolean> checkIfUserExists(@PathVariable int id) {
         boolean exists = voterService.checkIfUserExistsById(id);
         return ResponseEntity.ok(exists);

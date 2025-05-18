@@ -44,7 +44,7 @@ public class SecurityConfig {
                         "/api/auth/voter/login", "/api/auth/user/login", "/api/auth/reset-password",
                         "/api/auth/super-admin/invitation/verify",
                         "/api/auth/super-user/register", "/api/auth/super-admin/invitation/register", "/hello",
-                        "/api/auth/**/exists", "/api/auth/**/userexists")
+                        "/api/auth/exists/**", "/api/auth/userexists/**")
                 .permitAll()
                 .requestMatchers("/api/auth/voter/update-password", "api/auth/voter/update-info").hasAuthority("VOTER")
                 .requestMatchers(
