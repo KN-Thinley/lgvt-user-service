@@ -21,11 +21,13 @@ import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.dao.CidDocument;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
+import com.lgvt.user_service.dto.AuditDto;
 import com.lgvt.user_service.entity.GeneralUser;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.exception.UserAlreadyExistException;
+import com.lgvt.user_service.feign.AuditFeign;
 import com.lgvt.user_service.security.CustomDetailsService;
 import com.lgvt.user_service.utils.FileUploadUtil;
 import jakarta.servlet.http.Cookie;
@@ -52,6 +54,9 @@ public class VoterServiceImpl implements VoterService {
     @Autowired
     private UserDAO userDAO;
 
+    @Autowired
+    private AuditFeign auditFeign;
+
     @Override
     @Transactional
     public String saveVoter(@Valid Voter voter, MultipartFile imageFile) {
@@ -64,6 +69,17 @@ public class VoterServiceImpl implements VoterService {
             throw new UserAlreadyExistException("This Voter already exists");
         } else {
             Voter voter_res = voterDAO.saveVoter(voter);
+
+            // Create audit log
+            AuditDto audit = new AuditDto(
+                    voter.getEmail(),
+                    "VOTER_CREATE", // action
+                    "Voter registered successfully",
+                    null, // ipAddress, set if available
+                    "SUCCESS" // status
+            );
+            auditFeign.createAudit(audit);
+
             // Send Email
             String token = voterDAO.sendRegistrationConfirmationEmail(voter_res);
             return token;
@@ -81,63 +97,168 @@ public class VoterServiceImpl implements VoterService {
         return response;
     }
 
+    // public ResponseEntity<LoginResponse> loginVoter(Voter voter,
+    // HttpServletResponse response) {
+    // Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
+
+    // if (existingVoter != null) {
+    // // Check if the password is correct
+    // Authentication authentication = authenticationManager
+    // .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(),
+    // voter.getPassword()));
+    // if (authentication.isAuthenticated()) {
+    // // Check if the user is verified
+    // if (existingVoter.isVerified()) {
+    // // Create UserInfo object
+
+    // LoginUserInfo userInfo = new LoginUserInfo(
+    // existingVoter.getId(),
+    // existingVoter.getEmail(),
+    // existingVoter.getName(),
+    // existingVoter.getRole().toString());
+
+    // // Check if the user has done MFA
+    // if (existingVoter.isLogged_in()) {
+
+    // UserDetails userDetails =
+    // customUserDetailsService.loadUserByUsername(voter.getEmail());
+    // String token = jwtService.generateToken(userDetails);
+
+    // // Set JWT as a cookie
+    // Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+    // jwtCookie.setHttpOnly(true);
+    // response.addCookie(jwtCookie);
+
+    // AuditDto audit = new AuditDto(
+    // voter.getEmail(),
+    // "AUTH_SUCCESS", // action
+    // "Voter Logged In successfully",
+    // null, // ipAddress, set if available
+    // "SUCCESS" // status
+    // );
+    // auditFeign.createAudit(audit);
+
+    // return ResponseEntity.ok(new LoginResponse(
+    // "Login successful",
+    // token,
+    // true,
+    // "proceed",
+    // userInfo));
+    // } else {
+    // // Redirect to MFA page
+    // String token = voterDAO.sendLoginMFAEmail(existingVoter);
+
+    // // Generate and send a email
+    // return ResponseEntity.ok(new LoginResponse(
+    // "Multifactor Authentication needed",
+    // token,
+    // false,
+    // "redirect_to_mfa", userInfo));
+    // }
+    // } else {
+    // // User is not verified
+    // return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new LoginResponse(
+    // "User is not verified",
+    // null,
+    // false,
+    // "verify_user", null));
+    // }
+    // } else {
+    // // Password is incorrect
+    // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
+    // "Incorrect password",
+    // null,
+    // false,
+    // "retry_login",
+    // null));
+    // }
+    // } else {
+    // // User does not exist
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LoginResponse(
+    // "User does not exist",
+    // null,
+    // false,
+    // "register_user", null));
+    // }
+    // }
+
     public ResponseEntity<LoginResponse> loginVoter(Voter voter, HttpServletResponse response) {
         Voter existingVoter = voterDAO.getVoterByEmail(voter.getEmail());
 
         if (existingVoter != null) {
-            // Check if the password is correct
-            Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(),
-                            voter.getPassword()));
-            if (authentication.isAuthenticated()) {
-                // Check if the user is verified
-                if (existingVoter.isVerified()) {
-                    // Create UserInfo object
+            try {
+                // Try to authenticate
+                Authentication authentication = authenticationManager
+                        .authenticate(new UsernamePasswordAuthenticationToken(voter.getEmail(), voter.getPassword()));
 
-                    LoginUserInfo userInfo = new LoginUserInfo(
-                            existingVoter.getId(),
-                            existingVoter.getEmail(),
-                            existingVoter.getName(),
-                            existingVoter.getRole().toString());
+                if (authentication.isAuthenticated()) {
+                    if (existingVoter.isVerified()) {
+                        // Create UserInfo object
+                        LoginUserInfo userInfo = new LoginUserInfo(
+                                existingVoter.getId(),
+                                existingVoter.getEmail(),
+                                existingVoter.getName(),
+                                existingVoter.getRole().toString());
 
-                    // Check if the user has done MFA
-                    if (existingVoter.isLogged_in()) {
+                        // Check if the user has done MFA
+                        if (existingVoter.isLogged_in()) {
+                            UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
+                            String token = jwtService.generateToken(userDetails);
 
-                        UserDetails userDetails = customUserDetailsService.loadUserByUsername(voter.getEmail());
-                        String token = jwtService.generateToken(userDetails);
+                            // Set JWT as a cookie
+                            Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+                            jwtCookie.setHttpOnly(true);
+                            response.addCookie(jwtCookie);
 
-                        // Set JWT as a cookie
-                        Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
-                        jwtCookie.setHttpOnly(true);
-                        response.addCookie(jwtCookie);
+                            AuditDto audit = new AuditDto(
+                                    voter.getEmail(),
+                                    "AUTH_SUCCESS",
+                                    "Voter Logged In successfully",
+                                    null,
+                                    "SUCCESS");
+                            auditFeign.createAudit(audit);
 
-                        return ResponseEntity.ok(new LoginResponse(
-                                "Login successful",
-                                token,
-                                true,
-                                "proceed",
-                                userInfo));
+                            return ResponseEntity.ok(new LoginResponse(
+                                    "Login successful",
+                                    token,
+                                    true,
+                                    "proceed",
+                                    userInfo));
+                        } else {
+                            // Redirect to MFA page
+                            String token = voterDAO.sendLoginMFAEmail(existingVoter);
+
+                            return ResponseEntity.ok(new LoginResponse(
+                                    "Multifactor Authentication needed",
+                                    token,
+                                    false,
+                                    "redirect_to_mfa",
+                                    userInfo));
+                        }
                     } else {
-                        // Redirect to MFA page
-                        String token = voterDAO.sendLoginMFAEmail(existingVoter);
-
-                        // Generate and send a email
-                        return ResponseEntity.ok(new LoginResponse(
-                                "Multifactor Authentication needed",
-                                token,
+                        AuditDto audit = new AuditDto(
+                                voter.getEmail(),
+                                "AUTH_FAILURE",
+                                "User is not verified",
+                                null,
+                                "ERROR");
+                        auditFeign.createAudit(audit);
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new LoginResponse(
+                                "User is not verified",
+                                null,
                                 false,
-                                "redirect_to_mfa", userInfo));
+                                "verify_user", null));
                     }
-                } else {
-                    // User is not verified
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new LoginResponse(
-                            "User is not verified",
-                            null,
-                            false,
-                            "verify_user", null));
                 }
-            } else {
-                // Password is incorrect
+            } catch (Exception ex) {
+                // Authentication failed (e.g., bad credentials)
+                AuditDto audit = new AuditDto(
+                        voter.getEmail(),
+                        "AUTH_FAILURE",
+                        "Incorrect password",
+                        null,
+                        "ERROR");
+                auditFeign.createAudit(audit);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
                         "Incorrect password",
                         null,
@@ -146,13 +267,28 @@ public class VoterServiceImpl implements VoterService {
                         null));
             }
         } else {
-            // User does not exist
+            AuditDto audit = new AuditDto(
+                    voter.getEmail(),
+                    "AUTH_FAILURE",
+                    "User does not exist",
+                    null,
+                    "ERROR");
+            auditFeign.createAudit(audit);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LoginResponse(
                     "User does not exist",
                     null,
                     false,
                     "register_user", null));
         }
+
+        // Add a default return statement to satisfy the compiler (should not be
+        // reached)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse(
+                "An unexpected error occurred",
+                null,
+                false,
+                "error",
+                null));
     }
 
     public ResponseEntity<String> logout(String email, HttpServletResponse response) {
@@ -237,9 +373,27 @@ public class VoterServiceImpl implements VoterService {
         // Pass the voter's old password to the passwordReset method
         if (existingVoter instanceof Voter) {
             voterDAO.passwordReset(password, (Voter) existingVoter);
+
+            // Audit for successful password reset
+            AuditDto audit = new AuditDto(
+                    existingVoter.getEmail(),
+                    "PASSWORD_RESET",
+                    "Voter Password has been successfully reset.",
+                    null,
+                    "SUCCESS");
+            auditFeign.createAudit(audit);
         } else {
             // Code for the Admin and SuperAdmin
             userDAO.passwordReset(password, (User) existingVoter);
+
+            // Audit for successful password reset
+            AuditDto audit = new AuditDto(
+                    existingVoter.getEmail(),
+                    "PASSWORD_RESET",
+                    "User Password has been successfully reset.",
+                    null,
+                    "SUCCESS");
+            auditFeign.createAudit(audit);
         }
 
         // Remove the token after successful password reset
@@ -301,6 +455,13 @@ public class VoterServiceImpl implements VoterService {
         }
 
         voterDAO.passwordReset(password, existingVoter);
+        AuditDto audit = new AuditDto(
+                existingVoter.getEmail(),
+                "PASSWORD_RESET",
+                "Voter Password has been successfully reset.",
+                null,
+                "SUCCESS");
+        auditFeign.createAudit(audit);
         return ResponseEntity.ok("Password has been successfully updated.");
     }
 
@@ -345,5 +506,13 @@ public class VoterServiceImpl implements VoterService {
 
         // Save the updated voter
         voterDAO.save(voter);
+
+        AuditDto audit = new AuditDto(
+                email,
+                "VOTER_UPDATE",
+                "Voter Information has been successfully updated.",
+                null,
+                "SUCCESS");
+        auditFeign.createAudit(audit);
     }
 }

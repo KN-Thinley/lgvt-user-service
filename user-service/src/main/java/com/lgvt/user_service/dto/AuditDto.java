@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuditDto {
-    private Long id;
-    private LocalDateTime timestamp;
     private String user_email;
     private String action;     // Enum as string
     private String description;

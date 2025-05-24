@@ -22,8 +22,10 @@ import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.dao.SecureTokenDAO;
 import com.lgvt.user_service.dao.UserDAO;
 import com.lgvt.user_service.dao.VoterDAO;
+import com.lgvt.user_service.dto.AuditDto;
 import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.Voter;
+import com.lgvt.user_service.feign.AuditFeign;
 import com.lgvt.user_service.security.CustomDetailsService;
 
 import jakarta.servlet.http.Cookie;
@@ -46,6 +48,9 @@ public class UserServiceImpl implements UserService {
     private JwtService jwtService;
     @Autowired
     private CustomDetailsService customUserDetailsService;
+
+    @Autowired
+    private AuditFeign auditFeign;
 
     @Override
     public ResponseEntity<String> saveUser(User user) {
@@ -73,38 +78,112 @@ public class UserServiceImpl implements UserService {
         return userDAO.userExistsById(id);
     }
 
+    // @Override
+    // public ResponseEntity<LoginResponse> login(User user, HttpServletResponse
+    // response) {
+    // // Fetch the user by email
+    // User existingUser = userDAO.getUserByEmail(user.getEmail());
+
+    // if (existingUser != null) {
+    // // Authenticate the user
+    // Authentication authentication = authenticationManager
+    // .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(),
+    // user.getPassword()));
+
+    // if (authentication.isAuthenticated()) {
+    // // Update the last login time
+    // existingUser.setLastLogin(LocalDateTime.now());
+    // userDAO.saveUserWithoutPasswordEncryption(existingUser); // Save the updated
+    // user
+
+    // String token = voterDAO.sendLoginMFAEmail(existingUser);
+
+    // LoginUserInfo userInfo = new LoginUserInfo(
+    // existingUser.getId(),
+    // existingUser.getEmail(),
+    // existingUser.getName(),
+    // existingUser.getRole().toString());
+
+    // // Return success response
+    // return ResponseEntity.ok(new LoginResponse(
+    // "Successful Send A MFA Email",
+    // token,
+    // false,
+    // "redirect_to_mfa",
+    // userInfo));
+    // } else {
+    // // Password is incorrect
+    // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
+    // "Incorrect password",
+    // null,
+    // false,
+    // "retry_login", null));
+    // }
+    // } else {
+    // // User does not exist
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LoginResponse(
+    // "User does not exist",
+    // null,
+    // false,
+    // "register_user", null));
+    // }
+    // }
+
     @Override
     public ResponseEntity<LoginResponse> login(User user, HttpServletResponse response) {
-        // Fetch the user by email
         User existingUser = userDAO.getUserByEmail(user.getEmail());
 
         if (existingUser != null) {
-            // Authenticate the user
-            Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+            try {
+                // Authenticate the user
+                Authentication authentication = authenticationManager
+                        .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
-            if (authentication.isAuthenticated()) {
-                // Update the last login time
-                existingUser.setLastLogin(LocalDateTime.now());
-                userDAO.saveUserWithoutPasswordEncryption(existingUser); // Save the updated user
+                if (authentication.isAuthenticated()) {
+                    // Update the last login time
+                    existingUser.setLastLogin(LocalDateTime.now());
+                    userDAO.saveUserWithoutPasswordEncryption(existingUser);
 
-                String token = voterDAO.sendLoginMFAEmail(existingUser);
+                    String token = voterDAO.sendLoginMFAEmail(existingUser);
 
-                LoginUserInfo userInfo = new LoginUserInfo(
-                        existingUser.getId(),
-                        existingUser.getEmail(),
-                        existingUser.getName(),
-                        existingUser.getRole().toString());
+                    LoginUserInfo userInfo = new LoginUserInfo(
+                            existingUser.getId(),
+                            existingUser.getEmail(),
+                            existingUser.getName(),
+                            existingUser.getRole().toString());
 
-                // Return success response
-                return ResponseEntity.ok(new LoginResponse(
-                        "Successful Send A MFA Email",
-                        token,
-                        false,
-                        "redirect_to_mfa",
-                        userInfo));
-            } else {
-                // Password is incorrect
+                    return ResponseEntity.ok(new LoginResponse(
+                            "Successful Send A MFA Email",
+                            token,
+                            false,
+                            "redirect_to_mfa",
+                            userInfo));
+                } else {
+                    // Audit log for incorrect password
+                    AuditDto audit = new AuditDto(
+                            user.getEmail(),
+                            "AUTH_FAILURE",
+                            "Incorrect password",
+                            null,
+                            "ERROR");
+                    auditFeign.createAudit(audit);
+
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
+                            "Incorrect password",
+                            null,
+                            false,
+                            "retry_login", null));
+                }
+            } catch (Exception ex) {
+                // Audit log for authentication exception (e.g., bad credentials)
+                AuditDto audit = new AuditDto(
+                        user.getEmail(),
+                        "AUTH_FAILURE",
+                        "Incorrect password",
+                        null,
+                        "ERROR");
+                auditFeign.createAudit(audit);
+
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(
                         "Incorrect password",
                         null,
@@ -112,7 +191,15 @@ public class UserServiceImpl implements UserService {
                         "retry_login", null));
             }
         } else {
-            // User does not exist
+            // Audit log for user not found
+            AuditDto audit = new AuditDto(
+                    user.getEmail(),
+                    "AUTH_FAILURE",
+                    "User does not exist",
+                    null,
+                    "ERROR");
+            auditFeign.createAudit(audit);
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LoginResponse(
                     "User does not exist",
                     null,
@@ -146,6 +233,13 @@ public class UserServiceImpl implements UserService {
         }
 
         userDAO.passwordReset(password, existingUser);
+        AuditDto audit = new AuditDto(
+                email,
+                "PASSWORD_RESET",
+                "User Password Changed successfully",
+                null,
+                "SUCCESS");
+        auditFeign.createAudit(audit);
         return ResponseEntity.ok("Password has been successfully updated.");
     }
 
@@ -244,6 +338,14 @@ public class UserServiceImpl implements UserService {
 
         // Delete the voter
         voterDAO.delete(voter);
+
+        AuditDto audit = new AuditDto(
+                voter.getEmail(),
+                " VOTER_DELETE",
+                "Voter deleted successfully",
+                null,
+                "SUCCESS");
+        auditFeign.createAudit(audit);
     }
 
     @Override
@@ -304,5 +406,13 @@ public class UserServiceImpl implements UserService {
 
         // Save the updated admin
         userDAO.save(admin);
+
+        AuditDto audit = new AuditDto(
+                email,
+                "USER_UPDATE",
+                "User Information Updated successfully",
+                null,
+                "SUCCESS");
+        auditFeign.createAudit(audit);
     }
 }

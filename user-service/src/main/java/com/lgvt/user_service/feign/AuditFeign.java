@@ -13,9 +13,9 @@ import com.lgvt.user_service.dto.AuditDto;
 
 @FeignClient(name = "AUDIT-LOG-SERVICE")
 public interface AuditFeign {
-    @GetMapping
+    @GetMapping("/api/audits")
     public ResponseEntity<List<AuditDto>> getAllAudits();
 
-    @PostMapping
+    @PostMapping("/api/audits")
     public ResponseEntity<AuditDto> createAudit(@RequestBody AuditDto audit);
 }

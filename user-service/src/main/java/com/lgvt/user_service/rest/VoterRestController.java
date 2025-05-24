@@ -26,8 +26,10 @@ import com.lgvt.user_service.Response.LoginResponse;
 import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.Response.VerifyForgotPasswordResponse;
 import com.lgvt.user_service.dao.SecureTokenDAO;
+import com.lgvt.user_service.dto.AuditDto;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
+import com.lgvt.user_service.feign.AuditFeign;
 import com.lgvt.user_service.security.CustomDetailsService;
 import com.lgvt.user_service.service.JwtService;
 import com.lgvt.user_service.service.SecureTokenService;
@@ -54,6 +56,9 @@ public class VoterRestController {
 
     @Autowired
     private SecureTokenDAO secureTokenDAO;
+
+    @Autowired
+    private AuditFeign auditFeign;
 
     @Autowired
     public VoterRestController(VoterService voterService, SecureTokenService secureTokenService,
@@ -151,8 +156,23 @@ public class VoterRestController {
                             secureToken.getUser().getRole().toString());
                 }
                 // responseBody.put("user", user);
-
-                // Return response
+                if (secureToken.getVoter() != null) {
+                    AuditDto audit = new AuditDto(
+                            email,
+                            "AUTH_SUCCESS",
+                            "Voter Logged In successfully",
+                            null,
+                            "SUCCESS");
+                    auditFeign.createAudit(audit);
+                }else{
+                    AuditDto audit = new AuditDto(
+                            email,
+                            "AUTH_SUCCESS",
+                            "User Logged In successfully",
+                            null,
+                            "SUCCESS");
+                    auditFeign.createAudit(audit);
+                }
                 // Return success response
                 return ResponseEntity.ok(new LoginResponse(
                         "OTP verified successfully",
