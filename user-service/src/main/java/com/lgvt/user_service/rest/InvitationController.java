@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lgvt.user_service.entity.Invitation;
 import com.lgvt.user_service.entity.Role;
 import com.lgvt.user_service.entity.User;
+import com.lgvt.user_service.feign.AuditFeign;
 import com.lgvt.user_service.service.InvitationService;
 
 @RestController
@@ -23,6 +24,9 @@ import com.lgvt.user_service.service.InvitationService;
 public class InvitationController {
     @Autowired
     private InvitationService invitationService;
+
+     @Autowired
+    private AuditFeign auditFeign;
 
     @PostMapping("/super-admin/invitation")
     public ResponseEntity<Object> createInvitation(@RequestBody Map<String, String> payload) {
@@ -131,7 +135,7 @@ public class InvitationController {
             return ResponseEntity.status(500).body(null);
         }
     }
-
+ 
     @DeleteMapping("/super-admin/admin")
     public ResponseEntity<Object> deleteUserOrInvitation(@RequestParam String email) {
         try {

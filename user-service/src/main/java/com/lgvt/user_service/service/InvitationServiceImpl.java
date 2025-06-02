@@ -2,11 +2,13 @@ package com.lgvt.user_service.service;
 
 import com.lgvt.user_service.dao.InvitationDAO;
 import com.lgvt.user_service.dao.UserDAO;
+import com.lgvt.user_service.dto.AuditDto;
 import com.lgvt.user_service.entity.Invitation;
 import com.lgvt.user_service.entity.InvitationStatus;
 import com.lgvt.user_service.entity.Role;
 import com.lgvt.user_service.entity.User;
 import com.lgvt.user_service.entity.UserStatus;
+import com.lgvt.user_service.feign.AuditFeign;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -26,6 +28,9 @@ public class InvitationServiceImpl implements InvitationService {
     private InvitationDAO invitationDAO;
     @Autowired
     private UserDAO userDAO;
+
+    @Autowired
+    private AuditFeign auditFeign;
 
     private static final int CODE_LENGTH = 8;
 
@@ -61,6 +66,16 @@ public class InvitationServiceImpl implements InvitationService {
 
         // Send the invitation email
         invitationDAO.sendInvitationEmail(savedInvitation);
+
+        // Add audit log
+        AuditDto audit = new AuditDto(
+                email,
+                "ADMIN_INVITE",
+                "Invitation created and sent successfully.",
+                null,
+                "SUCCESS");
+
+        auditFeign.createAudit(audit);
 
         return savedInvitation;
     }
@@ -161,6 +176,15 @@ public class InvitationServiceImpl implements InvitationService {
             existingUser.setPassword(user.getPassword());
             existingUser.setStatus(UserStatus.ACTIVE); // Reactivate the user
             userDAO.saveUser(existingUser);
+
+            // Audit: Reactivated existing user
+            AuditDto audit = new AuditDto(
+                    invitation.getEmail(),
+                    "ADMIN_CREATE",
+                    "Existing admin credentials updated and account reactivated.",
+                    null,
+                    "SUCCESS");
+            auditFeign.createAudit(audit);
         } else {
             // If the user does not exist, set the email from the invitation to the user
             // object
@@ -168,6 +192,15 @@ public class InvitationServiceImpl implements InvitationService {
 
             // Register the user using the UserDAO
             userDAO.saveUser(user);
+
+            // 🔍 Audit: New admin registered
+            AuditDto audit = new AuditDto(
+                    invitation.getEmail(),
+                    "ADMIN_CREATE",
+                    "New admin registered using accepted invitation.",
+                    null,
+                    "SUCCESS");
+            auditFeign.createAudit(audit);
         }
     }
 
@@ -240,6 +273,15 @@ public class InvitationServiceImpl implements InvitationService {
             // If the user exists, disable them
             user.setStatus(UserStatus.DISABLED);
             userDAO.saveUser(user);
+
+            // Audit: User disabled
+            AuditDto audit = new AuditDto(
+                    email,
+                    "ADMIN_DELETE",
+                    "User disabled by admin.",
+                    null,
+                    "SUCCESS");
+            auditFeign.createAudit(audit);
         }
 
         // Check if the invitation exists and archive it
@@ -248,6 +290,15 @@ public class InvitationServiceImpl implements InvitationService {
             // Mark the invitation as ARCHIVED
             invitation.setStatus(InvitationStatus.ARCHIVED);
             invitationDAO.saveInvitation(invitation);
+
+            // Audit: Invitation archived
+            AuditDto audit = new AuditDto(
+                    email,
+                    "ADMIN_DELETE",
+                    "Invitation archived by admin.",
+                    null,
+                    "SUCCESS");
+            auditFeign.createAudit(audit);
         } else if (user == null) {
             // If neither user nor invitation exists, throw an exception
             throw new IllegalArgumentException("No user or invitation found for the provided email: " + email);

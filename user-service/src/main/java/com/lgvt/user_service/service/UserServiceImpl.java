@@ -327,7 +327,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteVoterById(int id) {
-        // Check if the voter exists
+        // Check if the voter existss
         Voter voter = voterDAO.findById(id);
         if (voter == null) {
             throw new IllegalArgumentException("Voter not found with ID: " + id);
