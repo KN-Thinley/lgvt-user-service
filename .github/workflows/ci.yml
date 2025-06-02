@@ -58,13 +58,13 @@ jobs:
           dockerfile: user-service/Dockerfile
           directory: user-service
 
-  # deploy:
-  #   needs: [test, build]
-  #   runs-on: ubuntu-latest
+  deploy:
+    needs: [test, build]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Deploy to production
-  #       uses: johnbeynon/render-deploy-action@v0.0.8
-  #       with:
-  #         service-id: ${{ secrets.RENDER_SERVICE_ID }}
-  #         api-key: ${{ secrets.RENDER_API_KEY }}
+    steps:
+      - name: Deploy to production
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
