@@ -214,9 +214,9 @@ public class UserServiceImpl implements UserService {
 
         if (existingVoter != null) {
             // ་Cookie Clearing
-            Cookie jwtCookie = new Cookie("JWT-TOKEN", null);
-            jwtCookie.setMaxAge(0);
-            response.addCookie(jwtCookie);
+            // Cookie jwtCookie = new Cookie("JWT-TOKEN", null);
+            // jwtCookie.setMaxAge(0);
+            // response.addCookie(jwtCookie);
             return ResponseEntity.ok().build();
 
         } else {

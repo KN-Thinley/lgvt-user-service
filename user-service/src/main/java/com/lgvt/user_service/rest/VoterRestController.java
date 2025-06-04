@@ -1,10 +1,12 @@
 package com.lgvt.user_service.rest;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgvt.user_service.Response.ForgotPasswordResponse;
 import com.lgvt.user_service.Response.LoginResponse;
@@ -27,6 +30,7 @@ import com.lgvt.user_service.Response.LoginUserInfo;
 import com.lgvt.user_service.Response.VerifyForgotPasswordResponse;
 import com.lgvt.user_service.dao.SecureTokenDAO;
 import com.lgvt.user_service.dto.AuditDto;
+import com.lgvt.user_service.entity.Gender;
 import com.lgvt.user_service.entity.SecureToken;
 import com.lgvt.user_service.entity.Voter;
 import com.lgvt.user_service.feign.AuditFeign;
@@ -70,7 +74,7 @@ public class VoterRestController {
 
     // If user leaves half way
     // If user token gets expired
-    @PostMapping(value = "/voter/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v2/voter/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> save(@RequestPart Voter voter, @RequestPart MultipartFile file) {
         // Save the voter
 
@@ -84,6 +88,42 @@ public class VoterRestController {
         response.put("token", token);
 
         // Send the OTP to the email
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/voter/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> saveVoter(
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("cid") String cid,
+            @RequestParam("phone") String phone,
+            @RequestParam("dzongkhag") String dzongkhag,
+            @RequestParam("gewog") String gewog,
+            @RequestParam("village") String village,
+            @RequestParam("dob") @JsonFormat(pattern = "yyyy-MM-dd") LocalDate dob,
+            @RequestParam("gender") Gender gender,
+            @RequestParam("occupation") String occupation,
+            @RequestPart("file") MultipartFile file) {
+        Voter voter = new Voter();
+        voter.setName(name);
+        voter.setEmail(email);
+        voter.setPassword(password);
+        voter.setCid(cid);
+        voter.setPhone(phone);
+        voter.setDzongkhag(dzongkhag);
+        voter.setGewog(gewog);
+        voter.setVillage(village);
+        voter.setDob(dob);
+        voter.setGender(gender);
+        voter.setOccupation(occupation);
+
+        String token = voterService.saveVoter(voter, file);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Voter with CID " + voter.getCid() + " has been successfully created.");
+        response.put("token", token);
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -164,7 +204,7 @@ public class VoterRestController {
                             null,
                             "SUCCESS");
                     auditFeign.createAudit(audit);
-                }else{
+                } else {
                     AuditDto audit = new AuditDto(
                             email,
                             "AUTH_SUCCESS",

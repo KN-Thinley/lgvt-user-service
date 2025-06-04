@@ -206,9 +206,9 @@ public class VoterServiceImpl implements VoterService {
                             String token = jwtService.generateToken(userDetails);
 
                             // Set JWT as a cookie
-                            Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
-                            jwtCookie.setHttpOnly(true);
-                            response.addCookie(jwtCookie);
+                            // Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+                            // jwtCookie.setHttpOnly(true);
+                            // response.addCookie(jwtCookie);
 
                             AuditDto audit = new AuditDto(
                                     voter.getEmail(),
@@ -304,9 +304,9 @@ public class VoterServiceImpl implements VoterService {
                 voterDAO.logoutVoter(existingVoter);
 
                 // ་Cookie Clearing
-                Cookie jwtCookie = new Cookie("JWT-TOKEN", null);
-                jwtCookie.setMaxAge(0);
-                response.addCookie(jwtCookie);
+                // Cookie jwtCookie = new Cookie("JWT-TOKEN", null);
+                // jwtCookie.setMaxAge(0);
+                // response.addCookie(jwtCookie);
                 return ResponseEntity.ok().build();
             } else {
                 // User is not logged in
@@ -474,9 +474,9 @@ public class VoterServiceImpl implements VoterService {
         String token = jwtService.generateToken(userDetails);
 
         // Set JWT as a cookie
-        Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
-        jwtCookie.setHttpOnly(true); // Set the cookie path
-        response.addCookie(jwtCookie);
+        // Cookie jwtCookie = new Cookie("JWT-TOKEN", token);
+        // jwtCookie.setHttpOnly(true); // Set the cookie path
+        // response.addCookie(jwtCookie);
 
         return token;
     }
