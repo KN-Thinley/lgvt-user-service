@@ -15,7 +15,7 @@ This microservice handles **user authentication, registration, and role manageme
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-org/your-service-repo.git
+   git clone git@github.com:KN-Thinley/lgvt-user-service.git
    cd your-service-repo
    ```
 
@@ -34,8 +34,11 @@ This microservice handles **user authentication, registration, and role manageme
    ```
 
 4. **Access the service**:
-   - The backend will usually be accessible at `http://localhost:[port]`
+   - The backend will usually be accessible at `http://localhost:8080`
 
+## 🌐 Live Deployment
+- 🔗 [Live Site — Replace this with your actual deployed domain.](https://lgvt-user-service.onrender.com)
+  
 ## 👥 Project Authors
 - **Kinley Norbu Thinley** – Full Stack Developer, Project Manager
 - **Kuenzang Namgyel** – Full Stack Developer
