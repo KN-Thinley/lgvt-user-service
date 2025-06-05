@@ -16,7 +16,7 @@ This microservice handles **user authentication, registration, and role manageme
 1. **Clone the repository**:
    ```bash
    git clone git@github.com:KN-Thinley/lgvt-user-service.git
-   cd your-service-repo
+   cd lgvt-user-service
    ```
 
 2. **Open inside a Docker container** (recommended with VS Code Remote - Containers):
