@@ -197,21 +197,21 @@ public class VoterRestController {
                 }
                 // responseBody.put("user", user);
                 if (secureToken.getVoter() != null) {
-                    AuditDto audit = new AuditDto(
-                            email,
-                            "AUTH_SUCCESS",
-                            "Voter Logged In successfully",
-                            null,
-                            "SUCCESS");
-                    auditFeign.createAudit(audit);
+                    // AuditDto audit = new AuditDto(
+                    //         email,
+                    //         "AUTH_SUCCESS",
+                    //         "Voter Logged In successfully",
+                    //         null,
+                    //         "SUCCESS");
+                    // auditFeign.createAudit(audit);
                 } else {
-                    AuditDto audit = new AuditDto(
-                            email,
-                            "AUTH_SUCCESS",
-                            "User Logged In successfully",
-                            null,
-                            "SUCCESS");
-                    auditFeign.createAudit(audit);
+                    // AuditDto audit = new AuditDto(
+                    //         email,
+                    //         "AUTH_SUCCESS",
+                    //         "User Logged In successfully",
+                    //         null,
+                    //         "SUCCESS");
+                    // auditFeign.createAudit(audit);
                 }
                 // Return success response
                 return ResponseEntity.ok(new LoginResponse(

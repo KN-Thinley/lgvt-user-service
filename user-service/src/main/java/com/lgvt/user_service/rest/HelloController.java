@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class HelloController {
-    @GetMapping("/hello")
+    @GetMapping("/api/auth/hello")
     public String hello() {
         return "Hello, World! From user services.";
     }
