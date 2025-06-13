@@ -65,6 +65,7 @@ public class VoterDAOImpl implements VoterDAO {
             return false;
         }
     }
+    
 
     @Override
     public boolean checkIfUserExistsById(int id){
